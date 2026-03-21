@@ -150,9 +150,9 @@ export default function PhoneCard({
       )}
 
       {/* 2-column layout */}
-      <div className="flex gap-5">
+      <div className="flex flex-col md:flex-row gap-5">
         {/* LEFT: name, tagline, why, pros/cons, CTA */}
-        <div className="flex flex-col gap-3 flex-[3] min-w-0">
+        <div className="flex flex-col gap-3 md:flex-[3] min-w-0">
           {/* Header row */}
           <div className="flex items-center justify-between">
             <span
@@ -209,46 +209,62 @@ export default function PhoneCard({
           </div>
 
           {/* Pros / Cons */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              {phone.pros.map((pro, i) => (
-                <div key={i} className="flex items-start gap-1.5">
-                  <ArrowRightIcon size={14} className="text-emerald-400" style={{ marginTop: 1, flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{pro}</span>
-                </div>
-              ))}
+          <div className="flex flex-col gap-3">
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 9,
+                  textTransform: "uppercase",
+                  letterSpacing: 1.2,
+                  color: "rgba(52,211,153,0.7)",
+                  marginBottom: 6,
+                }}
+              >
+                Pros
+              </div>
+              <div className="space-y-1.5">
+                {phone.pros.map((pro, i) => (
+                  <div key={i} className="flex items-start gap-1.5">
+                    <ArrowRightIcon size={14} className="text-emerald-400" style={{ marginTop: 1, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{pro}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="space-y-1.5">
-              {phone.cons.map((con, i) => (
-                <div key={i} className="flex items-start gap-1.5">
-                  <ArrowRightIcon size={14} className="text-rose-400" style={{ marginTop: 1, flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{con}</span>
-                </div>
-              ))}
+            <div>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 9,
+                  textTransform: "uppercase",
+                  letterSpacing: 1.2,
+                  color: "rgba(251,113,133,0.7)",
+                  marginBottom: 6,
+                }}
+              >
+                Cons
+              </div>
+              <div className="space-y-1.5">
+                {phone.cons.map((con, i) => (
+                  <div key={i} className="flex items-start gap-1.5">
+                    <ArrowRightIcon size={14} className="text-rose-400" style={{ marginTop: 1, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{con}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Amazon CTA */}
-          <button
-            onClick={handleBuyClick}
-            className="btn btn-amazon"
-            style={{ marginTop: "auto" }}
-          >
-            <CartIcon size={16} />
-            Buy on Amazon
-            <ArrowRightIcon size={14} />
-          </button>
-
-          <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 10, textAlign: "center", margin: 0 }}>
-            Prices may vary
-          </p>
+          {/* Amazon CTA — desktop only (mobile version is below specs) */}
         </div>
 
         {/* Divider */}
-        <div style={{ width: "0.5px", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
+        <div className="hidden md:block" style={{ width: "0.5px", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
+        <div className="md:hidden" style={{ height: "0.5px", background: "rgba(255,255,255,0.07)" }} />
 
         {/* RIGHT: specs + score bars */}
-        <div className="flex flex-col gap-4 flex-[2] min-w-0">
+        <div className="flex flex-col gap-4 md:flex-[2] min-w-0">
           {/* Specs grid */}
           <div className="grid grid-cols-2 gap-2">
             <SpecBadge label="Display" value={phone.specs.display} icon={<MaximizeIcon size={10} />} />
@@ -270,6 +286,20 @@ export default function PhoneCard({
               />
             ))}
           </div>
+
+          {/* Amazon CTA */}
+          <button
+            onClick={handleBuyClick}
+            className="btn btn-amazon"
+            style={{ marginTop: 4 }}
+          >
+            <CartIcon size={16} />
+            Buy on Amazon
+            <ArrowRightIcon size={14} />
+          </button>
+          <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 10, textAlign: "center", margin: 0 }}>
+            Prices may vary
+          </p>
         </div>
       </div>
     </div>
