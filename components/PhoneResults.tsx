@@ -1,6 +1,8 @@
 "use client";
 
 import PhoneCard from "@/components/PhoneCard";
+import { ArrowLeftIcon } from "@/components/ui/arrow-left";
+import { SparklesIcon } from "@/components/ui/sparkles";
 import type { RecommendationResponse } from "@/types";
 
 interface PhoneResultsProps {
@@ -16,21 +18,20 @@ export default function PhoneResults({
 }: PhoneResultsProps) {
   return (
     <div className="space-y-6">
-      {/* Summary */}
-      <div
-        className="glass-card"
-        style={{
-          padding: "1rem",
-          color: "rgba(255,255,255,0.55)",
-          fontSize: 14,
-          lineHeight: 1.65,
-        }}
-      >
-        {results.summary}
+      {/* Summary with animated gradient border */}
+      <div className="summary-gradient-border">
+        <div className="summary-gradient-inner">
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <SparklesIcon size={16} style={{ flexShrink: 0, marginTop: 2, color: "#a78bfa" }} />
+            <p style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, lineHeight: 1.65, margin: 0 }}>
+              {results.summary}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Phone cards grid */}
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* Phone cards stacked */}
+      <div className="flex flex-col gap-4">
         {results.phones.map((phone, i) => (
           <PhoneCard
             key={phone.name}
@@ -43,46 +44,13 @@ export default function PhoneResults({
 
       {/* Start Over button */}
       <div className="flex justify-center pt-4">
-        <button
-          onClick={onStartOver}
-          className="transition-all duration-200"
-          style={{
-            background: "rgba(255,255,255,0.06)",
-            border: "0.5px solid rgba(255,255,255,0.15)",
-            color: "rgba(255,255,255,0.6)",
-            borderRadius: 20,
-            padding: "8px 24px",
-            fontSize: 13,
-            cursor: "pointer",
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-            e.currentTarget.style.color = "#fff";
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-            e.currentTarget.style.color = "rgba(255,255,255,0.6)";
-          }}
-        >
-          ← Start Over
+        <button onClick={onStartOver} className="btn btn-ghost">
+          <ArrowLeftIcon size={14} />
+          Start Over
         </button>
       </div>
 
-      {/* Amazon disclaimer */}
-      <div
-        className="glass-card"
-        style={{
-          padding: "0.75rem 1rem",
-          color: "rgba(255,255,255,0.25)",
-          fontSize: 11,
-          lineHeight: 1.6,
-          textAlign: "center",
-        }}
-      >
-        As an Amazon Associate, we earn from qualifying purchases. Prices shown
-        are approximate and may vary. Product availability is subject to change.
-        Click links to check current prices on Amazon India.
-      </div>
+
     </div>
   );
 }

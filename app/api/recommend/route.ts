@@ -76,7 +76,7 @@ Recommend exactly 3 phones available in India 2025-2026 within or close to their
 Set isBestPick: true only for rank 1. Make whyThisPhone personalised to their use case. amazonSearchQuery should be the exact phone name. All scores should be between 0 and 100.`;
 
     const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20241022",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 4096,
       messages: [
         {
@@ -107,8 +107,10 @@ Set isBestPick: true only for rank 1. Make whyThisPhone personalised to their us
     return NextResponse.json(parsed, { status: 200 });
   } catch (error) {
     console.error("Recommendation API error:", error);
+    const message =
+      error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: "Failed to get recommendations. Please try again." },
+      { error: `Failed to get recommendations: ${message}` },
       { status: 500 }
     );
   }

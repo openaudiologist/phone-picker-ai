@@ -51,12 +51,12 @@ export default function Home() {
 
   return (
     <div
-      className="max-w-2xl mx-auto px-4 py-14"
+      className="max-w-4xl mx-auto px-4 py-14"
       style={{ position: "relative", zIndex: 1 }}
     >
       {/* Hero section */}
       {!results && !loading && (
-        <div className="text-center mb-10 space-y-4">
+        <div className="text-center mb-14 space-y-6">
           {/* Badge */}
           <div className="flex justify-center">
             <div
@@ -103,9 +103,10 @@ export default function Home() {
           <p
             style={{
               color: "rgba(255,255,255,0.45)",
-              fontSize: 14,
-              maxWidth: 400,
-              margin: "0 auto",
+              fontSize: 15,
+              maxWidth: 440,
+              margin: "12px auto 0",
+              lineHeight: 1.7,
             }}
           >
             Answer 5 quick questions and our AI will recommend the top 3 phones
@@ -113,7 +114,7 @@ export default function Home() {
           </p>
 
           {/* Trust pills */}
-          <div className="flex justify-center gap-2 flex-wrap">
+          <div className="flex justify-center gap-3 flex-wrap pt-1">
             {["🇮🇳 India prices", "⚡ 60 seconds", "🔒 No data stored"].map(
               (pill) => (
                 <span
@@ -123,8 +124,8 @@ export default function Home() {
                     border: "0.5px solid rgba(255,255,255,0.08)",
                     color: "rgba(255,255,255,0.45)",
                     borderRadius: 20,
-                    padding: "4px 12px",
-                    fontSize: 11,
+                    padding: "5px 14px",
+                    fontSize: 12,
                   }}
                 >
                   {pill}
@@ -145,31 +146,13 @@ export default function Home() {
           <p style={{ color: "#fb7185", fontSize: 14 }}>{error}</p>
           <button
             onClick={() => formData && handleSubmit(formData)}
-            className="transition-all duration-200"
-            style={{
-              background: "linear-gradient(135deg, #8b5cf6, #6366f1)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 20,
-              padding: "8px 24px",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            className="btn btn-primary"
           >
             Try Again
           </button>
           <button
             onClick={handleStartOver}
-            className="block mx-auto transition-all duration-200"
-            style={{
-              background: "none",
-              border: "none",
-              color: "rgba(255,255,255,0.3)",
-              textDecoration: "underline",
-              fontSize: 12,
-              cursor: "pointer",
-            }}
+            className="btn btn-link block mx-auto"
           >
             Start Over
           </button>

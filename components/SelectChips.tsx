@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { CheckIcon } from "@/components/ui/check";
 
 interface SelectChipsProps {
   options: string[];
@@ -65,7 +65,7 @@ export default function SelectChips({
               }
             }}
           >
-            {isSelected && <Check size={14} />}
+            {isSelected && <CheckIcon size={14} />}
             {option}
           </button>
         );

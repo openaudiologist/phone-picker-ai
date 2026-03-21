@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import BudgetSlider from "@/components/BudgetSlider";
 import SelectChips from "@/components/SelectChips";
+import { ArrowRightIcon, type ArrowRightIconHandle } from "@/components/ui/arrow-right";
+import { ArrowLeftIcon, type ArrowLeftIconHandle } from "@/components/ui/arrow-left";
 import type { FormData } from "@/types";
 
 interface StepFormProps {
@@ -49,6 +51,9 @@ const STEP_NAMES = [
 
 export default function StepForm({ onSubmit }: StepFormProps) {
   const [step, setStep] = useState(1);
+  const backArrowRef = useRef<ArrowLeftIconHandle>(null);
+  const nextArrowRef = useRef<ArrowRightIconHandle>(null);
+  const submitArrowRef = useRef<ArrowRightIconHandle>(null);
   const [formData, setFormData] = useState<FormData>({
     budget: 25000,
     primaryUse: [],
@@ -227,18 +232,7 @@ export default function StepForm({ onSubmit }: StepFormProps) {
                 outline: "none",
               }}
             />
-            <button
-              onClick={handleNext}
-              style={{
-                background: "none",
-                border: "none",
-                color: "rgba(255,255,255,0.3)",
-                textDecoration: "underline",
-                fontSize: 12,
-                cursor: "pointer",
-                padding: 0,
-              }}
-            >
+            <button onClick={handleNext} className="btn btn-link">
               Skip this step
             </button>
           </div>
@@ -276,26 +270,12 @@ export default function StepForm({ onSubmit }: StepFormProps) {
         {step > 1 ? (
           <button
             onClick={handleBack}
-            className="transition-all duration-200"
-            style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "0.5px solid rgba(255,255,255,0.15)",
-              color: "rgba(255,255,255,0.6)",
-              borderRadius: 20,
-              padding: "8px 20px",
-              fontSize: 13,
-              cursor: "pointer",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.1)";
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-              e.currentTarget.style.color = "rgba(255,255,255,0.6)";
-            }}
+            className="btn btn-ghost"
+            onMouseEnter={() => backArrowRef.current?.startAnimation()}
+            onMouseLeave={() => backArrowRef.current?.stopAnimation()}
           >
-            ← Back
+            <ArrowLeftIcon ref={backArrowRef} size={14} />
+            Back
           </button>
         ) : (
           <div />
@@ -305,57 +285,22 @@ export default function StepForm({ onSubmit }: StepFormProps) {
           <button
             onClick={handleNext}
             disabled={!canProceed()}
-            className="transition-all duration-200"
-            style={{
-              background: canProceed()
-                ? "linear-gradient(135deg, #8b5cf6, #6366f1)"
-                : "rgba(255,255,255,0.06)",
-              color: canProceed() ? "#fff" : "rgba(255,255,255,0.3)",
-              border: "none",
-              borderRadius: 20,
-              padding: "8px 24px",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: canProceed() ? "pointer" : "not-allowed",
-              opacity: canProceed() ? 1 : 0.5,
-            }}
-            onMouseOver={(e) => {
-              if (canProceed()) {
-                e.currentTarget.style.opacity = "0.88";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.opacity = canProceed() ? "1" : "0.5";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
+            className="btn btn-primary"
+            onMouseEnter={() => canProceed() && nextArrowRef.current?.startAnimation()}
+            onMouseLeave={() => nextArrowRef.current?.stopAnimation()}
           >
-            Next →
+            Next
+            <ArrowRightIcon ref={nextArrowRef} size={14} />
           </button>
         ) : (
           <button
             onClick={handleSubmit}
-            className="transition-all duration-200"
-            style={{
-              background: "linear-gradient(135deg, #8b5cf6, #6366f1)",
-              color: "#fff",
-              border: "none",
-              borderRadius: 20,
-              padding: "10px 28px",
-              fontSize: 14,
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.opacity = "0.88";
-              e.currentTarget.style.transform = "translateY(-1px)";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.opacity = "1";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
+            className="btn btn-primary-lg"
+            onMouseEnter={() => submitArrowRef.current?.startAnimation()}
+            onMouseLeave={() => submitArrowRef.current?.stopAnimation()}
           >
-            Find My Phone →
+            Find My Phone
+            <ArrowRightIcon ref={submitArrowRef} size={14} />
           </button>
         )}
       </div>

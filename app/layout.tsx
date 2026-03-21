@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { Sora, DM_Mono } from "next/font/google";
+import { Outfit, DM_Mono } from "next/font/google";
 import CosmicBg from "@/components/CosmicBg";
 import "./globals.css";
 
-const sora = Sora({
+const outfit = Outfit({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-sans",
@@ -28,7 +28,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${sora.variable} ${dmMono.variable} font-sans antialiased`}>
+        <body className={`${outfit.variable} ${dmMono.variable} font-sans antialiased`}>
         <CosmicBg />
         <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
       </body>
