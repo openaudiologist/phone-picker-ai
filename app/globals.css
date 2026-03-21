@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Cosmic Glass custom properties */
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-strong: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.10);
+    --glass-border-strong: rgba(255, 255, 255, 0.18);
+    --text-bright: #f1f0ff;
+    --text-mid: rgba(255, 255, 255, 0.65);
+    --text-dim: rgba(255, 255, 255, 0.35);
+    --accent-purple: #8b5cf6;
+    --accent-blue: #60a5fa;
+    --accent-pink: #f472b6;
+    --accent-green: #34d399;
+    --accent-red: #fb7185;
+
+    /* shadcn CSS variable overrides */
+    --background: 226 43% 6%;
+    --foreground: 246 100% 97%;
+    --card: 240 30% 8%;
+    --card-foreground: 246 100% 97%;
+    --popover: 240 30% 8%;
+    --popover-foreground: 246 100% 97%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 20% 12%;
+    --secondary-foreground: 240 10% 65%;
+    --muted: 240 20% 10%;
+    --muted-foreground: 240 10% 45%;
+    --accent: 240 20% 12%;
+    --accent-foreground: 246 100% 97%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 30% 16%;
+    --input: 240 25% 10%;
+    --ring: 262 83% 58%;
+    --radius: 0.75rem;
+  }
+}
+
+html,
+body {
+  background: #0d0818;
+  min-height: 100vh;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Glass card utilities */
+.glass-card {
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 0.5px solid var(--glass-border);
+  border-radius: 16px;
+}
+
+.glass-card-strong {
+  background: var(--glass-strong);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 0.5px solid var(--glass-border-strong);
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(139, 92, 246, 0.08);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Override shadcn Card background */
+.dark [class*="card"] {
+  background: transparent;
+}
+
+/* Twinkle animation for stars */
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--star-opacity);
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+/* Shimmer animation for loading skeleton */
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.05;
+  }
+  50% {
+    opacity: 0.12;
+  }
+}
+
+/* Pulse animation for best pick star */
+@keyframes pulse-star {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+}
+
+/* Score bar animation */
+@keyframes score-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--score-width);
+  }
+}
