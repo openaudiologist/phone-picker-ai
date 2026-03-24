@@ -107,7 +107,7 @@ export default function PhoneCard({
     <div
       className={cn(
         phone.isBestPick ? "glass-card-strong" : "glass-card",
-        "p-5"
+        "overflow-hidden p-5 sm:p-6"
       )}
       style={{
         opacity: 0,
@@ -127,89 +127,79 @@ export default function PhoneCard({
         }
       `}</style>
 
-      {/* Best pick badge — full width top */}
-      {phone.isBestPick && (
-        <div className="mb-4">
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              background: "rgba(139,92,246,0.2)",
-              border: "0.5px solid rgba(167,139,250,0.4)",
-              borderRadius: 20,
-              padding: "3px 12px",
-              color: "#c4b5fd",
-              fontSize: 11,
-            }}
-          >
-            <SparklesIcon size={14} />
-            Best Pick
-          </div>
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/45">
+            #{phone.rank}
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/55">
+            {phone.brand}
+          </span>
+          {phone.isBestPick ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-violet-300/30 bg-violet-400/15 px-3 py-1 text-[11px] text-violet-100">
+              <SparklesIcon size={13} />
+              Best pick
+            </span>
+          ) : null}
+          {typeof phone.matchScore === "number" ? (
+            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[11px] text-emerald-200/90">
+              Match {phone.matchScore}
+            </span>
+          ) : null}
         </div>
-      )}
 
-      {/* 2-column layout */}
-      <div className="flex flex-col md:flex-row gap-5">
-        {/* LEFT: name, tagline, why, pros/cons, CTA */}
-        <div className="flex flex-col gap-3 md:flex-[3] min-w-0">
-          {/* Header row */}
-          <div className="flex items-center justify-between">
-            <span
-              style={{
-                background: "rgba(255,255,255,0.06)",
-                border: "0.5px solid rgba(255,255,255,0.1)",
-                borderRadius: 20,
-                padding: "2px 10px",
-                fontSize: 11,
-                color: "rgba(255,255,255,0.45)",
-              }}
-            >
-              #{phone.rank}
-            </span>
-            <span className="gradient-text" style={{ fontWeight: 600, fontSize: 16 }}>
-              {phone.price}
-            </span>
+        <div className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-semibold text-white/92 shadow-[0_10px_24px_rgba(6,4,15,0.22)]">
+          {phone.price}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+        <div className="min-w-0 flex-[1.2] space-y-4">
+          <div className="space-y-2">
+            <h3 style={{ fontSize: 22, fontWeight: 500, color: "#f1f0ff", margin: 0 }}>
+              {phone.name}
+            </h3>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.58)", margin: 0, lineHeight: 1.65 }}>
+              {phone.tagline}
+            </p>
           </div>
 
-          {/* Phone name */}
-          <h3 style={{ fontSize: 18, fontWeight: 500, color: "#f1f0ff", margin: 0 }}>
-            {phone.name}
-          </h3>
-
-          {/* Tagline */}
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", margin: 0 }}>
-            {phone.tagline}
-          </p>
+          {phone.bestFor?.length ? (
+            <div className="flex flex-wrap gap-2">
+              {phone.bestFor.map((tag) => (
+                <span
+                  key={tag}
+                  style={{
+                    background: "rgba(96,165,250,0.1)",
+                    border: "0.5px solid rgba(96,165,250,0.16)",
+                    borderRadius: 999,
+                    padding: "4px 10px",
+                    color: "rgba(191,219,254,0.9)",
+                    fontSize: 11,
+                  }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          ) : null}
 
           {/* Why box */}
           <div
             style={{
               background: "rgba(255,255,255,0.04)",
-              border: "0.5px solid rgba(255,255,255,0.07)",
-              borderRadius: 10,
-              padding: "0.75rem 1rem",
+              border: "0.5px solid rgba(255,255,255,0.08)",
+              borderRadius: 20,
+              padding: "1rem 1rem",
             }}
           >
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 9,
-                color: "rgba(167,139,250,0.7)",
-                letterSpacing: 1.5,
-                textTransform: "uppercase",
-                marginBottom: 6,
-              }}
-            >
-              WHY WE PICKED THIS FOR YOU
-            </div>
+            <div className="section-kicker" style={{ marginBottom: 8 }}>Why this fits</div>
             <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.6, margin: 0 }}>
               {phone.whyThisPhone}
             </p>
           </div>
 
-          {/* Pros / Cons */}
-          <div className="flex flex-col gap-3">
+          {phone.matchReasons?.length ? (
             <div>
               <div
                 style={{
@@ -217,55 +207,90 @@ export default function PhoneCard({
                   fontSize: 9,
                   textTransform: "uppercase",
                   letterSpacing: 1.2,
-                  color: "rgba(52,211,153,0.7)",
+                  color: "rgba(96,165,250,0.75)",
                   marginBottom: 6,
                 }}
               >
-                Pros
+                Match reasons
               </div>
               <div className="space-y-1.5">
-                {phone.pros.map((pro, i) => (
-                  <div key={i} className="flex items-start gap-1.5">
-                    <ArrowRightIcon size={14} className="text-emerald-400" style={{ marginTop: 1, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{pro}</span>
+                {phone.matchReasons.map((reason) => (
+                  <div key={reason} className="flex items-start gap-1.5">
+                    <ArrowRightIcon size={14} className="text-sky-400" style={{ marginTop: 1, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{reason}</span>
                   </div>
                 ))}
               </div>
             </div>
-            <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 9,
-                  textTransform: "uppercase",
-                  letterSpacing: 1.2,
-                  color: "rgba(251,113,133,0.7)",
-                  marginBottom: 6,
-                }}
-              >
+          ) : null}
+
+          {/* Pros / Cons */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="rounded-[20px] border border-emerald-300/10 bg-emerald-400/5 p-4">
+              <div className="section-kicker" style={{ color: "rgba(110,231,183,0.72)", marginBottom: 8 }}>
+                Pros
+              </div>
+              <div className="space-y-2">
+                {phone.pros.map((pro, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <ArrowRightIcon size={14} className="text-emerald-300" style={{ marginTop: 1, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.55 }}>{pro}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[20px] border border-rose-300/10 bg-rose-400/5 p-4">
+              <div className="section-kicker" style={{ color: "rgba(251,113,133,0.72)", marginBottom: 8 }}>
                 Cons
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {phone.cons.map((con, i) => (
-                  <div key={i} className="flex items-start gap-1.5">
-                    <ArrowRightIcon size={14} className="text-rose-400" style={{ marginTop: 1, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{con}</span>
+                  <div key={i} className="flex items-start gap-2">
+                    <ArrowRightIcon size={14} className="text-rose-300" style={{ marginTop: 1, flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.55 }}>{con}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Amazon CTA — desktop only (mobile version is below specs) */}
+          {phone.avoidIf?.length ? (
+            <div
+              style={{
+                background: "rgba(251,113,133,0.06)",
+                border: "0.5px solid rgba(251,113,133,0.12)",
+                borderRadius: 10,
+                padding: "0.75rem 1rem",
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 9,
+                  textTransform: "uppercase",
+                  letterSpacing: 1.2,
+                  color: "rgba(251,113,133,0.72)",
+                  marginBottom: 6,
+                }}
+              >
+                Avoid if
+              </div>
+              <div className="space-y-1.5">
+                {phone.avoidIf.map((reason) => (
+                  <p key={reason} style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.52)", lineHeight: 1.55 }}>
+                    {reason}
+                  </p>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
         </div>
 
-        {/* Divider */}
-        <div className="hidden md:block" style={{ width: "0.5px", background: "rgba(255,255,255,0.07)", flexShrink: 0 }} />
-        <div className="md:hidden" style={{ height: "0.5px", background: "rgba(255,255,255,0.07)" }} />
+        <div className="hidden lg:block" style={{ width: "0.5px", background: "rgba(255,255,255,0.07)", flexShrink: 0, alignSelf: "stretch" }} />
 
-        {/* RIGHT: specs + score bars */}
-        <div className="flex flex-col gap-4 md:flex-[2] min-w-0">
-          {/* Specs grid */}
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="grid grid-cols-2 gap-2">
             <SpecBadge label="Display" value={phone.specs.display} icon={<MaximizeIcon size={10} />} />
             <SpecBadge label="Processor" value={phone.specs.processor} icon={<CpuIcon size={10} />} />
@@ -275,8 +300,9 @@ export default function PhoneCard({
             <SpecBadge label="OS" value={phone.specs.os} icon={<SettingsIcon size={10} />} />
           </div>
 
-          {/* Score bars */}
-          <div className="space-y-2">
+          <div className="rounded-[22px] border border-white/8 bg-white/4 p-4">
+            <div className="section-kicker mb-3">Scores</div>
+            <div className="space-y-2.5">
             {Object.entries(phone.scores).map(([key, value], i) => (
               <ScoreBar
                 key={key}
@@ -285,16 +311,16 @@ export default function PhoneCard({
                 delay={animationDelay * 1000 + 300 + i * 100}
               />
             ))}
+            </div>
           </div>
 
-          {/* Amazon CTA */}
           <button
             onClick={handleBuyClick}
             className="btn btn-amazon"
             style={{ marginTop: 4 }}
           >
             <CartIcon size={16} />
-            Buy on Amazon
+            Check on Amazon
             <ArrowRightIcon size={14} />
           </button>
           <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 10, textAlign: "center", margin: 0 }}>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import StepForm from "@/components/StepForm";
-import PhoneResults from "@/components/PhoneResults";
-import LoadingCards from "@/components/LoadingCards";
+import GuidedChat from "@/components/GuidedChat";
 import { trackFormComplete } from "@/lib/tracking";
-import type { FormData, RecommendationResponse } from "@/types";
+import type {
+  FormData,
+  RecommendationResponse,
+  YoutubeInsightResponse,
+} from "@/types";
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData | null>(null);
@@ -49,123 +51,72 @@ export default function Home() {
     setError(null);
   };
 
+  const handleFetchYoutubeInsights = async (phoneNames: string[]) => {
+    const responses = await Promise.all(
+      phoneNames.map(async (phoneName) => {
+        const res = await fetch("/api/youtube-insights", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phoneName }),
+        });
+
+        if (!res.ok) {
+          const errorBody = await res.json().catch(() => null);
+          throw new Error(errorBody?.error || `Failed to fetch YouTube insights for ${phoneName}`);
+        }
+
+        return (await res.json()) as YoutubeInsightResponse;
+      })
+    );
+
+    return responses.filter((item) => item.videoCount > 0 || item.highlights.length > 0);
+  };
+
   return (
-    <div
-      className="max-w-4xl mx-auto px-4 py-14"
-      style={{ position: "relative", zIndex: 1 }}
-    >
-      {/* Hero section */}
-      {!results && !loading && (
-        <div className="text-center mb-14 space-y-6">
-          {/* Badge */}
-          <div className="flex justify-center">
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                background: "rgba(139,92,246,0.12)",
-                border: "0.5px solid rgba(139,92,246,0.25)",
-                borderRadius: 20,
-                padding: "5px 14px",
-              }}
-            >
-              <span
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "#a78bfa",
-                  animation: "pulse-star 2s ease-in-out infinite",
-                  display: "inline-block",
-                }}
-              />
-              <span style={{ color: "#c4b5fd", fontSize: 11 }}>
-                Free · AI Powered · No Signup
-              </span>
+    <div className="relative z-[1] min-h-screen px-0 pb-0 pt-0 sm:px-4 sm:pb-4 sm:pt-4 lg:px-6 lg:pb-6 lg:pt-6">
+      <div className="mx-auto flex min-h-screen max-w-6xl flex-col sm:min-h-[calc(100vh-2rem)] lg:min-h-[calc(100vh-3rem)]">
+        <header className="sticky top-0 z-20 px-3 py-3 sm:px-0 sm:py-0">
+          <div className="glass-card-strong flex items-center justify-between gap-4 px-4 py-4 sm:px-5">
+            <div className="min-w-0">
+              <div className="section-kicker mb-1">Guided AI phone assistant</div>
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-lg font-medium text-[#f7f4ff] sm:text-xl">
+                  PhonePicker AI
+                </h1>
+                <span className="hidden rounded-full border border-violet-300/20 bg-violet-400/10 px-2.5 py-1 text-[11px] text-violet-100/80 sm:inline-flex">
+                  Mobile-first
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* H1 */}
-          <h1
-            style={{
-              fontSize: "clamp(34px, 6vw, 52px)",
-              fontWeight: 500,
-              color: "#f1f0ff",
-              lineHeight: 1.1,
-            }}
-          >
-            Find your perfect{" "}
-            <span className="gradient-text">phone</span>
-          </h1>
-
-          {/* Subtitle */}
-          <p
-            style={{
-              color: "rgba(255,255,255,0.45)",
-              fontSize: 15,
-              maxWidth: 440,
-              margin: "12px auto 0",
-              lineHeight: 1.7,
-            }}
-          >
-            Answer 5 quick questions and our AI will recommend the top 3 phones
-            matched to your needs — with real Amazon prices.
-          </p>
-
-          {/* Trust pills */}
-          <div className="flex justify-center gap-3 flex-wrap pt-1">
-            {["🇮🇳 India prices", "⚡ 60 seconds", "🔒 No data stored"].map(
-              (pill) => (
+            <div className="hidden items-center gap-2 sm:flex">
+              {[
+                "India prices",
+                "No typing",
+                loading ? "Thinking…" : results ? "3 matches ready" : "Structured flow",
+              ].map((pill) => (
                 <span
                   key={pill}
-                  style={{
-                    background: "rgba(255,255,255,0.05)",
-                    border: "0.5px solid rgba(255,255,255,0.08)",
-                    color: "rgba(255,255,255,0.45)",
-                    borderRadius: 20,
-                    padding: "5px 14px",
-                    fontSize: 12,
-                  }}
+                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-white/55"
                 >
                   {pill}
                 </span>
-              )
-            )}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        </header>
 
-      {/* Conditional render */}
-      {!results && !loading && !error && <StepForm onSubmit={handleSubmit} />}
-
-      {loading && <LoadingCards />}
-
-      {error && !loading && (
-        <div className="glass-card p-6 text-center space-y-4">
-          <p style={{ color: "#fb7185", fontSize: 14 }}>{error}</p>
-          <button
-            onClick={() => formData && handleSubmit(formData)}
-            className="btn btn-primary"
-          >
-            Try Again
-          </button>
-          <button
-            onClick={handleStartOver}
-            className="btn btn-link block mx-auto"
-          >
-            Start Over
-          </button>
-        </div>
-      )}
-
-      {results && formData && (
-        <PhoneResults
-          results={results}
-          budget={formData.budget}
-          onStartOver={handleStartOver}
-        />
-      )}
+        <main className="flex min-h-0 flex-1">
+          <GuidedChat
+            loading={loading}
+            results={results}
+            error={error}
+            onSubmitFinal={handleSubmit}
+            onStartOver={handleStartOver}
+            onFetchYoutubeInsights={handleFetchYoutubeInsights}
+          />
+        </main>
+      </div>
     </div>
   );
 }

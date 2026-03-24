@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 
 const loadingMessages = [
-  "Analysing your preferences…",
-  "Searching 500+ phones…",
-  "Comparing specs and prices…",
-  "Finding your perfect match…",
+  "Finding the best options for you",
+  "Balancing camera, battery, and value",
+  "Checking the strongest fits in your budget",
+  "Polishing your shortlist",
 ];
 
 export default function LoadingCards() {
@@ -20,87 +20,136 @@ export default function LoadingCards() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      {/* Loading text with spinner */}
-      <div className="flex items-center justify-center gap-3 py-4">
-        <div
-          style={{
-            width: 20,
-            height: 20,
-            borderRadius: "50%",
-            border: "2px solid rgba(255,255,255,0.1)",
-            borderTopColor: "#8b5cf6",
-            animation: "spin 0.8s linear infinite",
-          }}
-        />
-        <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 14 }}>
+    <div className="space-y-4">
+      <div className="glass-card flex items-center gap-3 px-4 py-3.5">
+        <div className="flex items-center gap-1.5">
+          {[0, 1, 2].map((dot) => (
+            <span
+              key={dot}
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background: "rgba(167,139,250,0.9)",
+                animation: `typingPulse 1.2s ease-in-out ${dot * 0.14}s infinite`,
+                display: "inline-block",
+              }}
+            />
+          ))}
+        </div>
+        <span style={{ color: "rgba(255,255,255,0.58)", fontSize: 13, lineHeight: 1.6 }}>
           {loadingMessages[messageIndex]}
         </span>
       </div>
 
-      {/* 3 skeleton cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="space-y-3">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="glass-card p-6 space-y-4"
+            className="glass-card space-y-4 p-5"
             style={{ animationDelay: `${i * 0.15}s` }}
           >
-            {/* Title skeleton */}
             <div
               style={{
-                height: 14,
-                width: "60%",
-                borderRadius: 8,
-                background: "rgba(255,255,255,0.06)",
+                height: 10,
+                width: "22%",
+                borderRadius: 999,
+                background: "rgba(167,139,250,0.12)",
                 animation: "shimmer 1.5s ease-in-out infinite",
                 animationDelay: `${i * 0.2}s`,
               }}
             />
-            {/* Subtitle skeleton */}
-            <div
-              style={{
-                height: 10,
-                width: "40%",
-                borderRadius: 8,
-                background: "rgba(255,255,255,0.04)",
-                animation: "shimmer 1.5s ease-in-out infinite",
-                animationDelay: `${i * 0.2 + 0.1}s`,
-              }}
-            />
-            {/* Content lines */}
-            {[1, 2, 3].map((j) => (
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1 space-y-3">
+                <div
+                  style={{
+                    height: 16,
+                    width: "52%",
+                    borderRadius: 8,
+                    background: "rgba(255,255,255,0.06)",
+                    animation: "shimmer 1.5s ease-in-out infinite",
+                    animationDelay: `${i * 0.2 + 0.05}s`,
+                  }}
+                />
+                <div
+                  style={{
+                    height: 12,
+                    width: "34%",
+                    borderRadius: 8,
+                    background: "rgba(255,255,255,0.04)",
+                    animation: "shimmer 1.5s ease-in-out infinite",
+                    animationDelay: `${i * 0.2 + 0.1}s`,
+                  }}
+                />
+              </div>
               <div
-                key={j}
                 style={{
-                  height: 8,
-                  width: `${70 + Math.random() * 20}%`,
-                  borderRadius: 8,
-                  background: "rgba(255,255,255,0.04)",
+                  height: 16,
+                  width: 74,
+                  borderRadius: 999,
+                  background: "rgba(255,255,255,0.06)",
                   animation: "shimmer 1.5s ease-in-out infinite",
-                  animationDelay: `${i * 0.2 + j * 0.1}s`,
+                  animationDelay: `${i * 0.2 + 0.12}s`,
                 }}
               />
-            ))}
-            {/* Button skeleton */}
-            <div
-              style={{
-                height: 36,
-                width: "100%",
-                borderRadius: 20,
-                background: "rgba(255,255,255,0.04)",
-                animation: "shimmer 1.5s ease-in-out infinite",
-                animationDelay: `${i * 0.2 + 0.4}s`,
-              }}
-            />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {[1, 2, 3, 4].map((j) => (
+                <div
+                  key={j}
+                  style={{
+                    height: 54,
+                    borderRadius: 16,
+                    background: "rgba(255,255,255,0.035)",
+                    animation: "shimmer 1.5s ease-in-out infinite",
+                    animationDelay: `${i * 0.2 + j * 0.08}s`,
+                  }}
+                />
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              {[1, 2, 3].map((j) => (
+                <div key={j} className="flex items-center gap-3">
+                  <div
+                    style={{
+                      height: 8,
+                      width: 72,
+                      borderRadius: 999,
+                      background: "rgba(255,255,255,0.04)",
+                      animation: "shimmer 1.5s ease-in-out infinite",
+                      animationDelay: `${i * 0.2 + j * 0.08}s`,
+                    }}
+                  />
+                  <div
+                    style={{
+                      height: 6,
+                      flex: 1,
+                      borderRadius: 999,
+                      background: "rgba(255,255,255,0.04)",
+                      animation: "shimmer 1.5s ease-in-out infinite",
+                      animationDelay: `${i * 0.2 + j * 0.1}s`,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
 
       <style jsx>{`
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
+        @keyframes typingPulse {
+          0%,
+          80%,
+          100% {
+            opacity: 0.35;
+            transform: translateY(0);
+          }
+          40% {
+            opacity: 1;
+            transform: translateY(-2px);
           }
         }
       `}</style>

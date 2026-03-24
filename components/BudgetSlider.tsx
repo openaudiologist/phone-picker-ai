@@ -14,8 +14,9 @@ function formatBudget(value: number): string {
 
 export default function BudgetSlider({ value, onChange }: BudgetSliderProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5 rounded-[24px] border border-white/8 bg-white/4 p-4">
       <div className="text-center">
+        <p className="section-kicker mb-2">Exact budget</p>
         <span
           className="gradient-text"
           style={{ fontSize: 36, fontWeight: 600 }}
@@ -31,8 +32,7 @@ export default function BudgetSlider({ value, onChange }: BudgetSliderProps) {
         step={1000}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full"
-        style={{ accentColor: "#8b5cf6" }}
+        className="slider-track"
       />
 
       <div
@@ -43,10 +43,10 @@ export default function BudgetSlider({ value, onChange }: BudgetSliderProps) {
           color: "rgba(255,255,255,0.25)",
         }}
       >
-        <span>Budget</span>
-        <span>Mid-range</span>
-        <span>Premium</span>
-        <span>Flagship</span>
+        <span>₹5k</span>
+        <span>₹25k</span>
+        <span>₹50k</span>
+        <span>₹2L</span>
       </div>
     </div>
   );

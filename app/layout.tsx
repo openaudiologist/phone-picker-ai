@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, DM_Mono } from "next/font/google";
-import CosmicBg from "@/components/CosmicBg";
+import Script from "next/script";
+import CosmicBg from "../components/CosmicBg";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -28,7 +29,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-        <body className={`${outfit.variable} ${dmMono.variable} font-sans antialiased`}>
+      <head>
+        <Script
+          id="google-tag-manager-loader"
+          src="https://www.googletagmanager.com/gtag/js?id=G-9HJHRE901E"
+          strategy="beforeInteractive"
+        />
+        <Script id="google-tag-init" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = window.gtag || gtag;
+            gtag('js', new Date());
+            gtag('config', 'G-9HJHRE901E');
+          `}
+        </Script>
+      </head>
+      <body className={`${outfit.variable} ${dmMono.variable} font-sans antialiased`}>
         <CosmicBg />
         <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
       </body>
