@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 interface ResultActionsProps {
   onCompare: () => void;
   onBatteryRefine: () => void;
@@ -30,17 +32,17 @@ export default function ResultActions({
   ];
 
   return (
-    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 pt-2 app-scrollbar">
+    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 pt-2">
       {actions.map((action) => (
-        <button
+        <Button
           key={action.label}
           type="button"
           onClick={action.onClick}
-          className="btn btn-ghost"
-          style={{ paddingInline: 14, fontSize: 12, whiteSpace: "nowrap", flexShrink: 0 }}
+          variant="secondary"
+          className="shrink-0 rounded-full px-4 text-xs"
         >
           {action.label}
-        </button>
+        </Button>
       ))}
     </div>
   );

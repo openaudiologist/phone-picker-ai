@@ -1,7 +1,9 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import type { ChatStepId } from "@/types";
-import { ArrowRightIcon } from "@/components/ui/arrow-right";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SummaryItem {
   label: string;
@@ -25,38 +27,33 @@ export default function SummaryCard({
   disabled = false,
 }: SummaryCardProps) {
   return (
-    <div className="summary-gradient-border">
-      <div className="summary-gradient-inner space-y-5 sm:p-5">
-        <div className="space-y-2">
-          <p className="section-kicker m-0">Summary</p>
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h3 className="m-0 text-lg font-medium text-[#f6f3ff]">Ready to shortlist your best phones</h3>
-              <p className="mt-2 text-sm leading-6 text-white/55">
-                This is the final brief I’ll send for recommendations. Edit anything, or launch the shortlist.
-              </p>
-            </div>
-          </div>
-        </div>
-
+    <Card className="border-border/70 bg-card/90 shadow-lg">
+      <CardHeader className="space-y-2">
+        <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Summary</p>
+        <CardTitle className="text-lg">Ready to shortlist your best phones</CardTitle>
+        <p className="text-sm leading-6 text-muted-foreground">
+          This is the final brief I’ll send for recommendations. Edit anything, or launch the shortlist.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-5">
         <div className="space-y-3">
         {items.map((item) => (
           <div
             key={item.label}
-            className="rounded-[20px] border border-white/8 bg-white/4 p-4"
+            className="rounded-3xl border border-border/70 bg-secondary/35 p-4"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <div className="section-kicker mb-2">{item.label}</div>
-                <p style={{ margin: 0, color: "rgba(255,255,255,0.84)", fontSize: 13, lineHeight: 1.65 }}>
+                <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{item.label}</div>
+                <p className="m-0 text-sm leading-6 text-foreground">
                   {item.value}
                 </p>
               </div>
 
               {item.stepId && onEditStep ? (
-                <button type="button" className="btn btn-link shrink-0" onClick={() => onEditStep(item.stepId!)}>
+                <Button type="button" variant="ghost" size="sm" className="shrink-0 rounded-full" onClick={() => onEditStep(item.stepId!)}>
                   Edit
-                </button>
+                </Button>
               ) : null}
             </div>
           </div>
@@ -64,15 +61,15 @@ export default function SummaryCard({
         </div>
 
         <div className="flex flex-col gap-3 pt-1 sm:flex-row">
-          <button type="button" onClick={onConfirm} className="btn btn-primary-lg sm:min-w-[220px]" disabled={disabled}>
+          <Button type="button" onClick={onConfirm} className="rounded-full sm:min-w-[220px]" disabled={disabled}>
             Find my best phones
-            <ArrowRightIcon size={14} />
-          </button>
-          <button type="button" onClick={onEditAnswers} className="btn btn-ghost sm:min-w-[150px]" disabled={disabled}>
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+          <Button type="button" onClick={onEditAnswers} variant="secondary" className="rounded-full sm:min-w-[150px]" disabled={disabled}>
             Edit answers
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { Outfit, DM_Mono } from "next/font/google";
+import { DM_Mono, Inter, Public_Sans } from "next/font/google";
 import Script from "next/script";
-import CosmicBg from "../components/CosmicBg";
+import { Providers } from "@/components/providers";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const outfit = Outfit({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-sans",
-});
+const publicSans = Public_Sans({subsets:['latin'],variable:'--font-sans'});
 
 const dmMono = DM_Mono({
   subsets: ["latin"],
@@ -28,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={cn("dark", "font-sans", publicSans.variable)}>
       <head>
         <Script
           id="google-tag-manager-loader"
@@ -45,9 +42,10 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${outfit.variable} ${dmMono.variable} font-sans antialiased`}>
-        <CosmicBg />
-        <main style={{ position: "relative", zIndex: 1 }}>{children}</main>
+      <body className={`${publicSans.variable} ${dmMono.variable} min-h-screen font-sans antialiased`}>
+        <Providers>
+          <main className="min-h-screen">{children}</main>
+        </Providers>
       </body>
     </html>
   );

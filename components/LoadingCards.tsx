@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const loadingMessages = [
   "Finding the best options for you",
@@ -21,138 +24,46 @@ export default function LoadingCards() {
 
   return (
     <div className="space-y-4">
-      <div className="glass-card flex items-center gap-3 px-4 py-3.5">
-        <div className="flex items-center gap-1.5">
-          {[0, 1, 2].map((dot) => (
-            <span
-              key={dot}
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                background: "rgba(167,139,250,0.9)",
-                animation: `typingPulse 1.2s ease-in-out ${dot * 0.14}s infinite`,
-                display: "inline-block",
-              }}
-            />
-          ))}
-        </div>
-        <span style={{ color: "rgba(255,255,255,0.58)", fontSize: 13, lineHeight: 1.6 }}>
+      <Card className="border-border/70 bg-card/85">
+        <CardContent className="flex items-center gap-3 p-4">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">
           {loadingMessages[messageIndex]}
-        </span>
-      </div>
+          </span>
+        </CardContent>
+      </Card>
 
       <div className="space-y-3">
         {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="glass-card space-y-4 p-5"
-            style={{ animationDelay: `${i * 0.15}s` }}
-          >
-            <div
-              style={{
-                height: 10,
-                width: "22%",
-                borderRadius: 999,
-                background: "rgba(167,139,250,0.12)",
-                animation: "shimmer 1.5s ease-in-out infinite",
-                animationDelay: `${i * 0.2}s`,
-              }}
-            />
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 flex-1 space-y-3">
-                <div
-                  style={{
-                    height: 16,
-                    width: "52%",
-                    borderRadius: 8,
-                    background: "rgba(255,255,255,0.06)",
-                    animation: "shimmer 1.5s ease-in-out infinite",
-                    animationDelay: `${i * 0.2 + 0.05}s`,
-                  }}
-                />
-                <div
-                  style={{
-                    height: 12,
-                    width: "34%",
-                    borderRadius: 8,
-                    background: "rgba(255,255,255,0.04)",
-                    animation: "shimmer 1.5s ease-in-out infinite",
-                    animationDelay: `${i * 0.2 + 0.1}s`,
-                  }}
-                />
-              </div>
-              <div
-                style={{
-                  height: 16,
-                  width: 74,
-                  borderRadius: 999,
-                  background: "rgba(255,255,255,0.06)",
-                  animation: "shimmer 1.5s ease-in-out infinite",
-                  animationDelay: `${i * 0.2 + 0.12}s`,
-                }}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              {[1, 2, 3, 4].map((j) => (
-                <div
-                  key={j}
-                  style={{
-                    height: 54,
-                    borderRadius: 16,
-                    background: "rgba(255,255,255,0.035)",
-                    animation: "shimmer 1.5s ease-in-out infinite",
-                    animationDelay: `${i * 0.2 + j * 0.08}s`,
-                  }}
-                />
-              ))}
-            </div>
-
-            <div className="space-y-2">
-              {[1, 2, 3].map((j) => (
-                <div key={j} className="flex items-center gap-3">
-                  <div
-                    style={{
-                      height: 8,
-                      width: 72,
-                      borderRadius: 999,
-                      background: "rgba(255,255,255,0.04)",
-                      animation: "shimmer 1.5s ease-in-out infinite",
-                      animationDelay: `${i * 0.2 + j * 0.08}s`,
-                    }}
-                  />
-                  <div
-                    style={{
-                      height: 6,
-                      flex: 1,
-                      borderRadius: 999,
-                      background: "rgba(255,255,255,0.04)",
-                      animation: "shimmer 1.5s ease-in-out infinite",
-                      animationDelay: `${i * 0.2 + j * 0.1}s`,
-                    }}
-                  />
+          <Card key={i} className="border-border/70 bg-card/80">
+            <CardContent className="space-y-4 p-5">
+              <Skeleton className="h-3 w-24 rounded-full" />
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1 space-y-3">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-3 w-1/3" />
                 </div>
-              ))}
-            </div>
-          </div>
+                <Skeleton className="h-6 w-20 rounded-full" />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {[1, 2, 3, 4].map((j) => (
+                  <Skeleton key={j} className="h-14 rounded-xl" />
+                ))}
+              </div>
+
+              <div className="space-y-2">
+                {[1, 2, 3].map((j) => (
+                  <div key={j} className="flex items-center gap-3">
+                    <Skeleton className="h-3 w-20 rounded-full" />
+                    <Skeleton className="h-2 flex-1 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
-
-      <style jsx>{`
-        @keyframes typingPulse {
-          0%,
-          80%,
-          100% {
-            opacity: 0.35;
-            transform: translateY(0);
-          }
-          40% {
-            opacity: 1;
-            transform: translateY(-2px);
-          }
-        }
-      `}</style>
     </div>
   );
 }

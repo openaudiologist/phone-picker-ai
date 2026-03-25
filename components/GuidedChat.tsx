@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, Check, PencilLine } from "lucide-react";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import {
   AssistantRuntimeProvider,
@@ -14,15 +15,22 @@ import OptionChips from "@/components/chat/OptionChips";
 import ResultActions from "@/components/chat/ResultActions";
 import SummaryCard from "@/components/chat/SummaryCard";
 import YoutubeInsightCard from "@/components/chat/YoutubeInsightCard";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   CHAT_STEPS,
   DEFAULT_GUIDED_ANSWERS,
-  type ChatStepDefinition,
   BUDGET_OPTIONS,
   getBudgetRangeLabel,
   getNextStepId,
   getPreviousStepId,
-  isConditionalStep,
   shouldAskCameraPriority,
   shouldAskGamingPriority,
 } from "@/lib/chat-flow";
@@ -40,7 +48,6 @@ import {
 import { cn } from "@/lib/utils";
 import type {
   ChatFlowMessage,
-  ChatOption,
   ChatStepId,
   FormData,
   GuidedAnswers,
@@ -74,22 +81,24 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
   });
 
   return (
-    <div className="glass-card space-y-4 p-4 sm:p-5">
-      <div>
-        <div className="section-kicker mb-2">Comparison view</div>
-        <p style={{ margin: 0, color: "rgba(255,255,255,0.55)", fontSize: 13, lineHeight: 1.6 }}>
+    <Card className="border-border/70 bg-card/85">
+      <CardHeader className="space-y-2">
+        <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Comparison view</p>
+        <CardTitle className="text-base">Score winners across the shortlist</CardTitle>
+        <CardDescription className="text-sm leading-6">
           Quick score-based winners across the three recommended phones. No extra AI call needed.
-        </p>
-      </div>
+        </CardDescription>
+      </CardHeader>
 
-      <div className="overflow-x-auto app-scrollbar">
+      <CardContent className="space-y-4">
+      <div className="overflow-x-auto">
         <div className="min-w-[620px] space-y-2">
           <div className="grid grid-cols-[140px_repeat(3,minmax(140px,1fr))] gap-2 px-1">
-            <div className="section-kicker self-end px-3 pb-2">Category</div>
+            <div className="self-end px-3 pb-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Category</div>
             {results.phones.map((phone) => (
-              <div key={phone.name} className="rounded-[18px] border border-white/8 bg-white/4 px-3 py-3 text-center">
-                <div className="text-sm font-medium text-white/88">{phone.name}</div>
-                <div className="mt-1 text-[11px] text-white/42">{phone.price}</div>
+              <div key={phone.name} className="rounded-2xl border border-border/70 bg-secondary/35 px-3 py-3 text-center">
+                <div className="text-sm font-medium text-foreground">{phone.name}</div>
+                <div className="mt-1 text-[11px] text-muted-foreground">{phone.price}</div>
               </div>
             ))}
           </div>
@@ -99,7 +108,7 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
 
             return (
               <div key={category} className="grid grid-cols-[140px_repeat(3,minmax(140px,1fr))] gap-2 px-1">
-                <div className="flex items-center rounded-[18px] border border-white/8 bg-white/4 px-3 py-3 text-sm capitalize text-white/72">
+                <div className="flex items-center rounded-2xl border border-border/70 bg-secondary/35 px-3 py-3 text-sm capitalize text-muted-foreground">
                   {category}
                 </div>
                 {results.phones.map((phone) => {
@@ -109,14 +118,14 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
                     <div
                       key={`${phone.name}-${category}`}
                       className={cn(
-                        "rounded-[18px] border px-3 py-3 text-center transition-colors",
+                        "rounded-2xl border px-3 py-3 text-center transition-colors",
                         isWinner
-                          ? "border-violet-300/30 bg-violet-400/10"
-                          : "border-white/8 bg-white/4"
+                          ? "border-primary/25 bg-primary/10"
+                          : "border-border/70 bg-secondary/35"
                       )}
                     >
-                      <div className="text-sm font-medium text-white/88">{phone.scores[category]}</div>
-                      <div className="mt-1 text-[11px] text-white/44">
+                      <div className="text-sm font-medium text-foreground">{phone.scores[category]}</div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">
                         {isWinner ? "Best value here" : "Competitive"}
                       </div>
                     </div>
@@ -130,20 +139,19 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {winners.map(({ category, phone }) => (
-          <div key={category} className="rounded-[20px] border border-white/8 bg-white/4 p-4">
-            <div className="section-kicker mb-2" style={{ color: "rgba(255,255,255,0.38)" }}>
+          <div key={category} className="rounded-3xl border border-border/70 bg-secondary/35 p-4">
+            <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               Best {category}
             </div>
-            <h4 style={{ margin: "0 0 6px", color: "#f1f0ff", fontSize: 15, fontWeight: 500 }}>
-              {phone.name}
-            </h4>
-            <p style={{ margin: 0, color: "rgba(255,255,255,0.52)", fontSize: 12 }}>
+            <h4 className="mb-1 text-sm font-semibold text-foreground">{phone.name}</h4>
+            <p className="text-xs text-muted-foreground">
               Score: {phone.scores[category]}/100
             </p>
           </div>
         ))}
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -169,8 +177,7 @@ function createUserAnswerMessage(stepId: ChatStepId, responseLabel: string) {
   });
 }
 
-function FooterCard({
-  title,
+function StepFooter({
   subtitle,
   children,
 }: {
@@ -179,18 +186,13 @@ function FooterCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="glass-card-strong space-y-4 p-4 sm:p-5">
-      {title ? (
-        <div className="space-y-1">
-          <p className="section-kicker m-0">Next step</p>
-          <h3 style={{ margin: 0, color: "#f1f0ff", fontSize: 17, fontWeight: 500 }}>{title}</h3>
-          {subtitle ? (
-            <p style={{ margin: 0, color: "rgba(255,255,255,0.5)", fontSize: 13, lineHeight: 1.65 }}>
-              {subtitle}
-            </p>
-          ) : null}
-        </div>
+    <div className="space-y-3">
+      {subtitle ? (
+        <p className="text-sm leading-6 text-muted-foreground">
+          {subtitle}
+        </p>
       ) : null}
+      <Separator className="bg-border/50" />
       {children}
     </div>
   );
@@ -282,7 +284,10 @@ export default function GuidedChat({
   useEffect(() => {
     if (bootstrappedRef.current) return;
     bootstrappedRef.current = true;
-    setMessages([createPromptMessage("welcome")]);
+    const timer = setTimeout(() => {
+      setMessages([createPromptMessage("welcome")]);
+    }, 1500);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -612,32 +617,12 @@ export default function GuidedChat({
       ? CHAT_STEPS[currentStep as Exclude<ChatStepId, "results">]
       : null;
 
-  const renderAccessory = useCallback(
-    (message: ChatFlowMessage) => {
-      if (loading && message.id === loadingMessageIdRef.current) {
-        return <LoadingCards />;
-      }
-
-      if (results && message.id === resultsMessageIdRef.current) {
-        return (
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4">
-              {results.phones.map((phone) => (
-                <PhoneCard key={phone.name} phone={phone} budget={answers.budget} />
-              ))}
-            </div>
-            {showCompare ? <CompareCard results={results} /> : null}
-            {(youtubeLoading || youtubeInsights.length > 0) ? (
-              <YoutubeInsightCard insights={youtubeInsights} loading={youtubeLoading} />
-            ) : null}
-          </div>
-        );
-      }
-
-      return null;
-    },
-    [answers.budget, loading, results, showCompare, youtubeInsights, youtubeLoading]
-  );
+  const lastAssistantMessageId = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") return messages[i].id;
+    }
+    return null;
+  }, [messages]);
 
   const footerContent = useMemo(() => {
     if (loading) {
@@ -646,16 +631,16 @@ export default function GuidedChat({
 
     if (error && !results) {
       return (
-        <FooterCard title="Recommendation issue" subtitle="You can retry the final fetch or adjust your answers locally.">
+        <StepFooter title="Recommendation issue" subtitle="You can retry the final fetch or adjust your answers locally.">
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="btn btn-primary" onClick={handleRetry}>
+            <Button type="button" className="rounded-2xl" onClick={handleRetry}>
               Try again
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={handleEditAnswers}>
+            </Button>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleEditAnswers}>
               Edit answers
-            </button>
+            </Button>
           </div>
-        </FooterCard>
+        </StepFooter>
       );
     }
 
@@ -675,18 +660,18 @@ export default function GuidedChat({
 
     if (currentStep === "welcome") {
       return (
-        <FooterCard title="Quick start" subtitle="Pick the angle you care about most — you can still refine everything after this.">
+        <StepFooter title="Quick start" subtitle="Tell us what matters most and we'll hunt down the perfect phone for you. Don't worry — you can tweak everything along the way.">
           <OptionChips
             options={activeStepDefinition?.options ?? []}
             onSelect={(option) => handleAnswer("welcome", String(option.value))}
           />
-        </FooterCard>
+        </StepFooter>
       );
     }
 
     if (currentStep === "budget") {
       return (
-        <FooterCard title="Budget" subtitle="Choose a range, or switch to the slider for an exact budget.">
+        <StepFooter title="Budget" subtitle="Choose a range, or switch to the slider for an exact budget.">
           <OptionChips
             options={BUDGET_OPTIONS}
             selectedValues={exactBudgetMode ? ["exact-budget"] : []}
@@ -705,28 +690,31 @@ export default function GuidedChat({
             <div className="space-y-4">
               <BudgetSlider value={draftBudget} onChange={setDraftBudget} />
               <div className="flex flex-wrap gap-3">
-                <button type="button" className="btn btn-primary" onClick={() => handleAnswer("budget", draftBudget)}>
+                <Button type="button" className="rounded-2xl" onClick={() => handleAnswer("budget", draftBudget)}>
+                  <Check className="h-4 w-4" />
                   Continue
-                </button>
-                <button type="button" className="btn btn-ghost" onClick={handleBack}>
+                </Button>
+                <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+                  <ArrowLeft className="h-4 w-4" />
                   Back
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
             <div className="flex flex-wrap gap-3">
-              <button type="button" className="btn btn-ghost" onClick={handleBack}>
+              <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+                <ArrowLeft className="h-4 w-4" />
                 Back
-              </button>
+              </Button>
             </div>
           )}
-        </FooterCard>
+        </StepFooter>
       );
     }
 
     if (currentStep === "primary_use") {
       return (
-        <FooterCard title="What matters most?" subtitle="Pick up to three priorities. This decides the rest of the flow.">
+        <StepFooter title="What matters most?" subtitle="Pick up to three priorities. This decides the rest of the flow.">
           <OptionChips
             options={activeStepDefinition?.options ?? []}
             selectedValues={draftSelections}
@@ -742,59 +730,63 @@ export default function GuidedChat({
             }}
           />
           <div className="flex flex-wrap gap-3">
-            <button
+            <Button
               type="button"
-              className={cn("btn btn-primary", !canContinueMultiSelect && "opacity-50")}
               onClick={() => handleAnswer("primary_use", draftSelections)}
               disabled={!canContinueMultiSelect}
+              className="rounded-2xl"
             >
+              <Check className="h-4 w-4" />
               Continue
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={handleBack}>
+            </Button>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
               Back
-            </button>
+            </Button>
           </div>
-        </FooterCard>
+        </StepFooter>
       );
     }
 
     if (currentStep === "brand") {
       return (
-        <FooterCard title="Brand preference" subtitle="Choose one if you already have a favourite ecosystem.">
+        <StepFooter title="Brand preference" subtitle="Choose one if you already have a favourite ecosystem.">
           <OptionChips
             options={activeStepDefinition?.options ?? []}
             selectedValues={draftSingleValue ? [draftSingleValue] : []}
             onSelect={(option) => handleAnswer("brand", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="btn btn-ghost" onClick={handleBack}>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
               Back
-            </button>
+            </Button>
           </div>
-        </FooterCard>
+        </StepFooter>
       );
     }
 
     if (currentStep === "upgrade_tier") {
       return (
-        <FooterCard title="Upgrade tier" subtitle="A rough tier is enough — this helps set expectations for the jump in quality.">
+        <StepFooter title="Upgrade tier" subtitle="A rough tier is enough — this helps set expectations for the jump in quality.">
           <OptionChips
             options={activeStepDefinition?.options ?? []}
             selectedValues={draftSingleValue ? [draftSingleValue] : []}
             onSelect={(option) => handleAnswer("upgrade_tier", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="btn btn-ghost" onClick={handleBack}>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
               Back
-            </button>
+            </Button>
           </div>
-        </FooterCard>
+        </StepFooter>
       );
     }
 
     if (currentStep === "pain_points") {
       return (
-        <FooterCard title="Pain points" subtitle="Pick what annoyed you most, or skip if you’re just ready for a clean upgrade.">
+        <StepFooter title="Pain points" subtitle="Pick what annoyed you most, or skip if you’re just ready for a clean upgrade.">
           <OptionChips
             options={(activeStepDefinition?.options ?? []).filter((option) => option.value !== "Skip")}
             selectedValues={draftSelections}
@@ -809,23 +801,25 @@ export default function GuidedChat({
             }}
           />
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="btn btn-primary" onClick={() => handleAnswer("pain_points", draftSelections)}>
+            <Button type="button" className="rounded-2xl" onClick={() => handleAnswer("pain_points", draftSelections)}>
+              <Check className="h-4 w-4" />
               Continue
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={() => handleAnswer("pain_points", [])}>
+            </Button>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={() => handleAnswer("pain_points", [])}>
               Skip
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={handleBack}>
+            </Button>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
               Back
-            </button>
+            </Button>
           </div>
-        </FooterCard>
+        </StepFooter>
       );
     }
 
     if (currentStep === "must_have") {
       return (
-        <FooterCard title="Non-negotiables" subtitle="Select anything you absolutely want in the final shortlist.">
+        <StepFooter title="Non-negotiables" subtitle="Select anything you absolutely want in the final shortlist.">
           <OptionChips
             options={activeStepDefinition?.options ?? []}
             selectedValues={draftSelections}
@@ -840,48 +834,52 @@ export default function GuidedChat({
             }}
           />
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="btn btn-primary" onClick={() => handleAnswer("must_have", draftSelections)}>
+            <Button type="button" className="rounded-2xl" onClick={() => handleAnswer("must_have", draftSelections)}>
+              <Check className="h-4 w-4" />
               Continue
-            </button>
-            <button type="button" className="btn btn-ghost" onClick={handleBack}>
+            </Button>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
               Back
-            </button>
+            </Button>
           </div>
-        </FooterCard>
+        </StepFooter>
       );
     }
 
     if (currentStep === "camera_priority") {
       return (
-        <FooterCard title="Camera priority" subtitle="This only appears because camera quality is part of your shortlist logic.">
+        <StepFooter title="Camera priority" subtitle="This only appears because camera quality is part of your shortlist logic.">
           <OptionChips
             options={activeStepDefinition?.options ?? []}
             selectedValues={draftSingleValue ? [draftSingleValue] : []}
             onSelect={(option) => handleAnswer("camera_priority", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="btn btn-ghost" onClick={handleBack}>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
               Back
-            </button>
+            </Button>
           </div>
-        </FooterCard>
+        </StepFooter>
       );
     }
 
     if (currentStep === "gaming_priority") {
       return (
-        <FooterCard title="Gaming priority" subtitle="This only appears because you picked gaming as a priority.">
+        <StepFooter title="Gaming priority" subtitle="This only appears because you picked gaming as a priority.">
           <OptionChips
             options={activeStepDefinition?.options ?? []}
             selectedValues={draftSingleValue ? [draftSingleValue] : []}
             onSelect={(option) => handleAnswer("gaming_priority", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
-            <button type="button" className="btn btn-ghost" onClick={handleBack}>
+            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4" />
               Back
-            </button>
+            </Button>
           </div>
-        </FooterCard>
+        </StepFooter>
       );
     }
 
@@ -920,9 +918,45 @@ export default function GuidedChat({
     summaryItems,
   ]);
 
+  const renderAccessory = useCallback(
+    (message: ChatFlowMessage) => {
+      const isLastAssistant = message.id === lastAssistantMessageId;
+
+      if (loading && message.id === loadingMessageIdRef.current) {
+        return <LoadingCards />;
+      }
+
+      if (results && message.id === resultsMessageIdRef.current) {
+        return (
+          <div className="space-y-4">
+            <div className="flex flex-col gap-4">
+              {results.phones.map((phone) => (
+                <PhoneCard key={phone.name} phone={phone} budget={answers.budget} />
+              ))}
+            </div>
+            {showCompare ? <CompareCard results={results} /> : null}
+            {(youtubeLoading || youtubeInsights.length > 0) ? (
+              <YoutubeInsightCard insights={youtubeInsights} loading={youtubeLoading} />
+            ) : null}
+            {isLastAssistant && footerContent ? (
+              <div className="pt-2">{footerContent}</div>
+            ) : null}
+          </div>
+        );
+      }
+
+      if (isLastAssistant && footerContent) {
+        return footerContent;
+      }
+
+      return null;
+    },
+    [answers.budget, footerContent, lastAssistantMessageId, loading, results, showCompare, youtubeInsights, youtubeLoading]
+  );
+
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <Thread renderAccessory={renderAccessory} footer={footerContent} />
+      <Thread renderAccessory={renderAccessory} welcomeFooter={footerContent} />
     </AssistantRuntimeProvider>
   );
 }

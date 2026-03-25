@@ -27,17 +27,17 @@ function extractHighlights(
   const signalDefinitions = [
     {
       label: "camera",
-      keywords: ["camera", "photo", "portrait", "low light", "video"],
+      keywords: ["camera", "photo", "portrait", "selfie", "low light", "video"],
       text: `Reviewers repeatedly focus on the ${phoneName} camera experience.`,
     },
     {
       label: "battery",
-      keywords: ["battery", "backup", "screen on time", "charging"],
+      keywords: ["battery", "backup", "screen on time", "charging", "drain"],
       text: `Battery life and charging are common talking points for the ${phoneName}.`,
     },
     {
       label: "performance",
-      keywords: ["performance", "gaming", "fps", "smooth", "processor"],
+      keywords: ["performance", "gaming", "fps", "smooth", "fast", "processor", "lag"],
       text: `Performance and gaming behaviour show up often in review coverage for the ${phoneName}.`,
     },
     {
@@ -49,6 +49,11 @@ function extractHighlights(
       label: "software",
       keywords: ["software", "ui", "update", "bloat", "clean ui"],
       text: `Software experience comes up frequently when reviewers discuss the ${phoneName}.`,
+    },
+    {
+      label: "value",
+      keywords: ["value", "price", "worth", "budget", "money"],
+      text: `Value for money is frequently discussed in ${phoneName} reviews.`,
     },
   ];
 
@@ -64,6 +69,7 @@ function extractHighlights(
 
   const complaintKeywords = [
     "heating",
+    "heat",
     "overheat",
     "throttling",
     "lag",
@@ -72,6 +78,9 @@ function extractHighlights(
     "slow charging",
     "ads",
     "bloatware",
+    "issue",
+    "problem",
+    "poor",
   ];
 
   const complaintHits = complaintKeywords.filter((keyword) => corpus.includes(keyword));
@@ -134,7 +143,7 @@ export async function POST(req: NextRequest) {
       part: "snippet",
       q: `${phoneName} review india`,
       type: "video",
-      maxResults: "4",
+      maxResults: "6",
       relevanceLanguage: "en",
       regionCode: "IN",
       safeSearch: "moderate",

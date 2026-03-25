@@ -1,7 +1,23 @@
 "use client";
 
+import type { ReactNode } from "react";
+import {
+  Camera,
+  Gamepad2,
+  BatteryFull,
+  Star,
+  ArrowUpCircle,
+} from "lucide-react";
 import type { ChatOption } from "@/types";
 import { cn } from "@/lib/utils";
+
+const OPTION_ICONS: Record<string, ReactNode> = {
+  "quick-camera": <Camera className="h-3.5 w-3.5" />,
+  "quick-gaming": <Gamepad2 className="h-3.5 w-3.5" />,
+  "quick-battery": <BatteryFull className="h-3.5 w-3.5" />,
+  "quick-all-rounder": <Star className="h-3.5 w-3.5" />,
+  "quick-upgrade": <ArrowUpCircle className="h-3.5 w-3.5" />,
+};
 
 interface OptionChipsProps {
   options: ChatOption[];
@@ -19,7 +35,7 @@ export default function OptionChips({
   onSelect,
 }: OptionChipsProps) {
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="flex flex-wrap gap-2">
       {options.map((option) => {
         const isSelected = selectedValues.includes(option.value);
         const maxReached =
@@ -27,6 +43,7 @@ export default function OptionChips({
           typeof maxSelect === "number" &&
           selectedValues.length >= maxSelect &&
           !isSelected;
+        const icon = OPTION_ICONS[option.id];
 
         return (
           <button
@@ -35,39 +52,17 @@ export default function OptionChips({
             disabled={option.disabled || maxReached}
             onClick={() => onSelect(option)}
             className={cn(
-              "group inline-flex min-h-[60px] w-full items-start justify-between rounded-[22px] border px-4 py-3 text-left transition-all duration-200",
+              "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm transition-all duration-200",
               option.disabled || maxReached
                 ? "cursor-not-allowed opacity-45"
-                : "hover:-translate-y-0.5 active:scale-[0.99]",
+                : "hover:bg-[var(--accent-color)] hover:text-[var(--accent-foreground)] hover:shadow-[0_0_12px_rgba(56,189,248,0.25)]",
               isSelected
-                ? "border-violet-300/55 text-violet-50 shadow-[0_16px_36px_rgba(91,33,182,0.16)]"
-                : "border-white/10 text-white/72 hover:border-violet-300/35 hover:text-violet-100"
+                ? "border-[var(--accent-color)] bg-[var(--accent-color)]/10 text-[var(--accent-color)]"
+                : "border-[var(--accent-color)]/60 text-[var(--accent-color)]"
             )}
-            style={{
-              background: isSelected
-                ? "linear-gradient(135deg, rgba(139,92,246,0.2), rgba(96,165,250,0.14))"
-                : "linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.03))",
-            }}
           >
-            <span className="min-w-0 pr-3">
-              <span className="block text-sm font-medium leading-5">{option.label}</span>
-              {option.description ? (
-                <span className="mt-1 block text-xs leading-5 text-white/42 group-hover:text-white/52">
-                  {option.description}
-                </span>
-              ) : null}
-            </span>
-
-            <span
-              className={cn(
-                "mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[11px]",
-                isSelected
-                  ? "border-violet-200/50 bg-violet-300/20 text-violet-100"
-                  : "border-white/12 bg-white/4 text-white/35"
-              )}
-            >
-              {isSelected ? "✓" : multiSelect ? "+" : "•"}
-            </span>
+            {icon}
+            {option.label}
           </button>
         );
       })}

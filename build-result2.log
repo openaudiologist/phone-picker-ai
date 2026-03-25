@@ -1,0 +1,52 @@
+
+> phone-picker-ai@1.0.0 build
+> next build
+
+  ▲ Next.js 14.2.0
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../typescript/lib/typescript' in f:\Github Projects\phone-picker-ai\node_modules\next\dist\build for build dependencies doesn't lead to expected result 'F:\Github Projects\phone-picker-ai\node_modules\typescript\lib\typescript.js', but to 'f:\Github Projects\phone-picker-ai\node_modules\typescript\lib\typescript.js' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../typescript/lib/typescript (expected F:\Github Projects\phone-picker-ai\node_modules\typescript\lib\typescript.js)
+<w>  at file dependencies f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\load-jsconfig.js
+<w>  at file f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\load-jsconfig.js
+<w>  at file dependencies f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack-config.js
+<w>  at file f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack-config.js
+<w>  at file dependencies f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w> [webpack.cache.PackFileCacheStrategy/webpack.FileSystemInfo] Resolving '../../../typescript/lib/typescript' in f:\Github Projects\phone-picker-ai\node_modules\next\dist\build for build dependencies doesn't lead to expected result 'F:\Github Projects\phone-picker-ai\node_modules\typescript\lib\typescript.js', but to 'f:\Github Projects\phone-picker-ai\node_modules\typescript\lib\typescript.js' instead. Resolving dependencies are ignored for this path.
+<w>  at resolve commonjs file ../../../typescript/lib/typescript (expected F:\Github Projects\phone-picker-ai\node_modules\typescript\lib\typescript.js)
+<w>  at file dependencies f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\load-jsconfig.js
+<w>  at file f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\load-jsconfig.js
+<w>  at file dependencies f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack-config.js
+<w>  at file f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack-config.js
+<w>  at file dependencies f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at file f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+<w>  at resolve commonjs f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\webpack\loaders\next-swc-loader.js
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/6) ...
+   Generating static pages (1/6) 
+   Generating static pages (2/6) 
+   Generating static pages (4/6) 
+ ✓ Generating static pages (6/6)
+   Finalizing page optimization ...
+   Collecting build traces ...
+Error: ENOENT: no such file or directory, open 'f:\Github Projects\phone-picker-ai\.next\server\app\_not-found\page.js.nft.json'
+    at async open (node:internal/fs/promises:639:25)
+    at async Object.readFile (node:internal/fs/promises:1249:14)
+    at async f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\collect-build-traces.js:429:50
+    at async Promise.all (index 0)
+    at async f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\collect-build-traces.js:410:13
+    at async Span.traceAsyncFn (f:\Github Projects\phone-picker-ai\node_modules\next\dist\trace\trace.js:154:20)
+    at async collectBuildTraces (f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\collect-build-traces.js:164:5)
+    at async f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\index.js:2127:13
+    at async Span.traceAsyncFn (f:\Github Projects\phone-picker-ai\node_modules\next\dist\trace\trace.js:154:20)
+    at async build (f:\Github Projects\phone-picker-ai\node_modules\next\dist\build\index.js:366:9) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'f:\\Github Projects\\phone-picker-ai\\.next\\server\\app\\_not-found\\page.js.nft.json'
+}

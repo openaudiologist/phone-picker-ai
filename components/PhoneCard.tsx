@@ -1,19 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CartIcon } from "@/components/ui/cart";
-import { ArrowRightIcon } from "@/components/ui/arrow-right";
-import { SparklesIcon } from "@/components/ui/sparkles";
-import { CpuIcon } from "@/components/ui/cpu";
-import { BatteryIcon } from "@/components/ui/battery";
-import { SettingsIcon } from "@/components/ui/settings";
-import { LayersIcon } from "@/components/ui/layers";
-import { MaximizeIcon } from "@/components/ui/maximize";
-import { EyeIcon } from "@/components/ui/eye";
-import { cn } from "@/lib/utils";
+import {
+  ArrowRight,
+  Battery,
+  Camera,
+  CheckCircle2,
+  Cpu,
+  Layers3,
+  MonitorSmartphone,
+  ShieldAlert,
+  ShoppingCart,
+  Smartphone,
+  Sparkles,
+} from "lucide-react";
+import SpecBadge from "@/components/SpecBadge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { getBestAmazonUrl } from "@/lib/amazon";
 import { trackPhoneClick } from "@/lib/tracking";
-import SpecBadge from "@/components/SpecBadge";
+import { cn } from "@/lib/utils";
 import type { PhoneRecommendation } from "@/types";
 
 interface PhoneCardProps {
@@ -22,73 +36,14 @@ interface PhoneCardProps {
   animationDelay?: number;
 }
 
-function ScoreBar({
-  label,
-  value,
-  delay,
-}: {
-  label: string;
-  value: number;
-  delay: number;
-}) {
-  const [width, setWidth] = useState(0);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setWidth(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-
-  const gradient =
-    value >= 75
-      ? "linear-gradient(90deg, #8b5cf6, #60a5fa)"
-      : value >= 50
-        ? "linear-gradient(90deg, #f472b6, #8b5cf6)"
-        : "linear-gradient(90deg, #fb7185, #f472b6)";
-
+function ScoreRow({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex items-center gap-3">
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 10,
-          color: "rgba(255,255,255,0.35)",
-          width: 96,
-          flexShrink: 0,
-          textTransform: "capitalize",
-        }}
-      >
-        {label}
-      </span>
-      <div
-        className="flex-1"
-        style={{
-          background: "rgba(255,255,255,0.07)",
-          height: 3,
-          borderRadius: 2,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            width: `${width}%`,
-            height: "100%",
-            background: gradient,
-            borderRadius: 2,
-            transition: "width 0.8s ease-out",
-          }}
-        />
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+        <span className="capitalize">{label}</span>
+        <span>{value}</span>
       </div>
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 10,
-          color: "rgba(255,255,255,0.3)",
-          width: 24,
-          textAlign: "right",
-        }}
-      >
-        {value}
-      </span>
+      <Progress value={value} className="h-2 bg-muted" />
     </div>
   );
 }
@@ -104,230 +59,154 @@ export default function PhoneCard({
   };
 
   return (
-    <div
+    <Card
       className={cn(
-        phone.isBestPick ? "glass-card-strong" : "glass-card",
-        "overflow-hidden p-5 sm:p-6"
+        "border-border/70 bg-card/90 shadow-lg animate-in fade-in-0 slide-in-from-bottom-2",
+        phone.isBestPick && "ring-1 ring-ring/40"
       )}
-      style={{
-        opacity: 0,
-        animation: `fadeUp 0.5s ease-out ${animationDelay}s forwards`,
-      }}
+      style={{ animationDelay: `${animationDelay}s` }}
     >
-      <style jsx>{`
-        @keyframes fadeUp {
-          from {
-            opacity: 0;
-            transform: translateY(16px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+      <CardHeader className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="rounded-full px-3 py-1">#{phone.rank}</Badge>
+            <Badge variant="outline" className="rounded-full px-3 py-1">{phone.brand}</Badge>
+            {phone.isBestPick ? (
+              <Badge className="rounded-full px-3 py-1">
+                <Sparkles className="mr-1 h-3.5 w-3.5" />
+                Best pick
+              </Badge>
+            ) : null}
+            {typeof phone.matchScore === "number" ? (
+              <Badge variant="outline" className="rounded-full px-3 py-1">
+                Match {phone.matchScore}
+              </Badge>
+            ) : null}
+          </div>
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/45">
-            #{phone.rank}
-          </span>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-white/55">
-            {phone.brand}
-          </span>
-          {phone.isBestPick ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-violet-300/30 bg-violet-400/15 px-3 py-1 text-[11px] text-violet-100">
-              <SparklesIcon size={13} />
-              Best pick
-            </span>
-          ) : null}
-          {typeof phone.matchScore === "number" ? (
-            <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[11px] text-emerald-200/90">
-              Match {phone.matchScore}
-            </span>
-          ) : null}
+          <Badge variant="secondary" className="rounded-full px-3 py-1.5 text-sm font-semibold text-foreground">
+            {phone.price}
+          </Badge>
         </div>
 
-        <div className="rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-sm font-semibold text-white/92 shadow-[0_10px_24px_rgba(6,4,15,0.22)]">
-          {phone.price}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
-        <div className="min-w-0 flex-[1.2] space-y-4">
-          <div className="space-y-2">
-            <h3 style={{ fontSize: 22, fontWeight: 500, color: "#f1f0ff", margin: 0 }}>
-              {phone.name}
-            </h3>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.58)", margin: 0, lineHeight: 1.65 }}>
-              {phone.tagline}
-            </p>
-          </div>
-
-          {phone.bestFor?.length ? (
-            <div className="flex flex-wrap gap-2">
-              {phone.bestFor.map((tag) => (
-                <span
-                  key={tag}
-                  style={{
-                    background: "rgba(96,165,250,0.1)",
-                    border: "0.5px solid rgba(96,165,250,0.16)",
-                    borderRadius: 999,
-                    padding: "4px 10px",
-                    color: "rgba(191,219,254,0.9)",
-                    fontSize: 11,
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          ) : null}
-
-          {/* Why box */}
-          <div
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "0.5px solid rgba(255,255,255,0.08)",
-              borderRadius: 20,
-              padding: "1rem 1rem",
-            }}
-          >
-            <div className="section-kicker" style={{ marginBottom: 8 }}>Why this fits</div>
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.6, margin: 0 }}>
-              {phone.whyThisPhone}
-            </p>
-          </div>
-
-          {phone.matchReasons?.length ? (
-            <div>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 9,
-                  textTransform: "uppercase",
-                  letterSpacing: 1.2,
-                  color: "rgba(96,165,250,0.75)",
-                  marginBottom: 6,
-                }}
-              >
-                Match reasons
-              </div>
-              <div className="space-y-1.5">
-                {phone.matchReasons.map((reason) => (
-                  <div key={reason} className="flex items-start gap-1.5">
-                    <ArrowRightIcon size={14} className="text-sky-400" style={{ marginTop: 1, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)" }}>{reason}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {/* Pros / Cons */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-[20px] border border-emerald-300/10 bg-emerald-400/5 p-4">
-              <div className="section-kicker" style={{ color: "rgba(110,231,183,0.72)", marginBottom: 8 }}>
-                Pros
-              </div>
-              <div className="space-y-2">
-                {phone.pros.map((pro, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <ArrowRightIcon size={14} className="text-emerald-300" style={{ marginTop: 1, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.55 }}>{pro}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[20px] border border-rose-300/10 bg-rose-400/5 p-4">
-              <div className="section-kicker" style={{ color: "rgba(251,113,133,0.72)", marginBottom: 8 }}>
-                Cons
-              </div>
-              <div className="space-y-2">
-                {phone.cons.map((con, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <ArrowRightIcon size={14} className="text-rose-300" style={{ marginTop: 1, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.55 }}>{con}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {phone.avoidIf?.length ? (
-            <div
-              style={{
-                background: "rgba(251,113,133,0.06)",
-                border: "0.5px solid rgba(251,113,133,0.12)",
-                borderRadius: 10,
-                padding: "0.75rem 1rem",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 9,
-                  textTransform: "uppercase",
-                  letterSpacing: 1.2,
-                  color: "rgba(251,113,133,0.72)",
-                  marginBottom: 6,
-                }}
-              >
-                Avoid if
-              </div>
-              <div className="space-y-1.5">
-                {phone.avoidIf.map((reason) => (
-                  <p key={reason} style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.52)", lineHeight: 1.55 }}>
-                    {reason}
-                  </p>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
+        <div className="space-y-2">
+          <CardTitle className="text-2xl">{phone.name}</CardTitle>
+          <CardDescription className="text-sm leading-6">{phone.tagline}</CardDescription>
         </div>
 
-        <div className="hidden lg:block" style={{ width: "0.5px", background: "rgba(255,255,255,0.07)", flexShrink: 0, alignSelf: "stretch" }} />
-
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <div className="grid grid-cols-2 gap-2">
-            <SpecBadge label="Display" value={phone.specs.display} icon={<MaximizeIcon size={10} />} />
-            <SpecBadge label="Processor" value={phone.specs.processor} icon={<CpuIcon size={10} />} />
-            <SpecBadge label="Camera" value={phone.specs.camera} icon={<EyeIcon size={10} />} />
-            <SpecBadge label="Battery" value={phone.specs.battery} icon={<BatteryIcon size={10} />} />
-            <SpecBadge label="RAM" value={phone.specs.ram} icon={<LayersIcon size={10} />} />
-            <SpecBadge label="OS" value={phone.specs.os} icon={<SettingsIcon size={10} />} />
-          </div>
-
-          <div className="rounded-[22px] border border-white/8 bg-white/4 p-4">
-            <div className="section-kicker mb-3">Scores</div>
-            <div className="space-y-2.5">
-            {Object.entries(phone.scores).map(([key, value], i) => (
-              <ScoreBar
-                key={key}
-                label={key}
-                value={value}
-                delay={animationDelay * 1000 + 300 + i * 100}
-              />
+        {phone.bestFor?.length ? (
+          <div className="flex flex-wrap gap-2">
+            {phone.bestFor.map((tag) => (
+              <Badge key={tag} variant="outline" className="rounded-full px-3 py-1">
+                {tag}
+              </Badge>
             ))}
+          </div>
+        ) : null}
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_auto_1fr]">
+          <div className="space-y-5">
+            <div className="rounded-3xl border border-border/70 bg-secondary/35 p-4">
+              <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Why this fits
+              </div>
+              <p className="text-sm leading-6 text-foreground">{phone.whyThisPhone}</p>
             </div>
+
+            {phone.matchReasons?.length ? (
+              <div className="space-y-2">
+                <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Match reasons
+                </div>
+                <ul className="space-y-2">
+                  {phone.matchReasons.map((reason) => (
+                    <li key={reason} className="flex items-start gap-2 text-sm leading-6 text-foreground">
+                      <CheckCircle2 className="mt-1 h-4 w-4 text-primary" />
+                      <span>{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-3xl border border-border/70 bg-secondary/35 p-4">
+                <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Pros
+                </div>
+                <ul className="space-y-2">
+                  {phone.pros.map((pro, index) => (
+                    <li key={`${pro}-${index}`} className="flex items-start gap-2 text-sm leading-6 text-foreground">
+                      <CheckCircle2 className="mt-1 h-4 w-4 text-primary" />
+                      <span>{pro}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-3xl border border-border/70 bg-secondary/35 p-4">
+                <div className="mb-3 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Cons
+                </div>
+                <ul className="space-y-2">
+                  {phone.cons.map((con, index) => (
+                    <li key={`${con}-${index}`} className="flex items-start gap-2 text-sm leading-6 text-foreground">
+                      <ShieldAlert className="mt-1 h-4 w-4 text-muted-foreground" />
+                      <span>{con}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {phone.avoidIf?.length ? (
+              <div className="rounded-3xl border border-border/70 bg-secondary/35 p-4">
+                <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  Avoid if
+                </div>
+                <ul className="space-y-2">
+                  {phone.avoidIf.map((reason) => (
+                    <li key={reason} className="text-sm leading-6 text-muted-foreground">{reason}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
 
-          <button
-            onClick={handleBuyClick}
-            className="btn btn-amazon"
-            style={{ marginTop: 4 }}
-          >
-            <CartIcon size={16} />
-            Check on Amazon
-            <ArrowRightIcon size={14} />
-          </button>
-          <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 10, textAlign: "center", margin: 0 }}>
-            Prices may vary
-          </p>
+          <Separator orientation="vertical" className="hidden lg:block" />
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <SpecBadge label="Display" value={phone.specs.display} icon={<MonitorSmartphone className="h-3 w-3" />} />
+              <SpecBadge label="Processor" value={phone.specs.processor} icon={<Cpu className="h-3 w-3" />} />
+              <SpecBadge label="Camera" value={phone.specs.camera} icon={<Camera className="h-3 w-3" />} />
+              <SpecBadge label="Battery" value={phone.specs.battery} icon={<Battery className="h-3 w-3" />} />
+              <SpecBadge label="RAM" value={phone.specs.ram} icon={<Layers3 className="h-3 w-3" />} />
+              <SpecBadge label="OS" value={phone.specs.os} icon={<Smartphone className="h-3 w-3" />} />
+            </div>
+
+            <div className="rounded-3xl border border-border/70 bg-secondary/35 p-4">
+              <div className="mb-4 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Scores
+              </div>
+              <div className="space-y-3">
+                {Object.entries(phone.scores).map(([key, value]) => (
+                  <ScoreRow key={key} label={key} value={value} />
+                ))}
+              </div>
+            </div>
+
+            <Button onClick={handleBuyClick} className="w-full rounded-full">
+              <ShoppingCart className="h-4 w-4" />
+              Check on Amazon
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">Prices may vary</p>
+          </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

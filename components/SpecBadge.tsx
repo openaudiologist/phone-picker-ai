@@ -6,39 +6,12 @@ interface SpecBadgeProps {
 
 export default function SpecBadge({ label, value, icon }: SpecBadgeProps) {
   return (
-    <div
-      style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "0.5px solid rgba(255,255,255,0.07)",
-        borderRadius: 10,
-        padding: "8px 10px",
-      }}
-    >
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 9,
-          textTransform: "uppercase",
-          letterSpacing: 1,
-          color: "rgba(255,255,255,0.3)",
-          marginBottom: 4,
-          display: "flex",
-          alignItems: "center",
-          gap: 4,
-        }}
-      >
-        {icon && <span style={{ opacity: 0.6, display: "flex" }}>{icon}</span>}
+    <div className="rounded-2xl border border-border/70 bg-secondary/40 p-3">
+      <div className="mb-1 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        {icon ? <span className="flex opacity-70">{icon}</span> : null}
         {label}
       </div>
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 500,
-          color: "#f1f0ff",
-        }}
-      >
-        {value}
-      </div>
+      <div className="text-sm font-medium text-foreground">{value}</div>
     </div>
   );
 }
