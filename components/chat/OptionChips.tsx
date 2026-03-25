@@ -9,7 +9,7 @@ import {
   ArrowUpCircle,
 } from "lucide-react";
 import type { ChatOption } from "@/types";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const OPTION_ICONS: Record<string, ReactNode> = {
   "quick-camera": <Camera className="h-3.5 w-3.5" />,
@@ -46,24 +46,18 @@ export default function OptionChips({
         const icon = OPTION_ICONS[option.id];
 
         return (
-          <button
+          <Button
             key={option.id}
             type="button"
+            variant={isSelected ? "chip-active" : "chip"}
+            size="chip"
             disabled={option.disabled || maxReached}
             onClick={() => onSelect(option)}
-            className={cn(
-              "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-4 py-1.5 text-sm transition-all duration-200",
-              option.disabled || maxReached
-                ? "cursor-not-allowed opacity-45"
-                : "hover:bg-[var(--accent-color)] hover:text-[var(--accent-foreground)] hover:shadow-[0_0_12px_rgba(56,189,248,0.25)]",
-              isSelected
-                ? "border-[var(--accent-color)] bg-[var(--accent-color)]/10 text-[var(--accent-color)]"
-                : "border-[var(--accent-color)]/60 text-[var(--accent-color)]"
-            )}
+            className="justify-start"
           >
             {icon}
             {option.label}
-          </button>
+          </Button>
         );
       })}
     </div>

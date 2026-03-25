@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import type { FormData, RecommendationResponse } from "@/types";
 
+const WHY_THIS_PHONE_MAX_CHARS = 200;
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
@@ -16,6 +18,10 @@ function isStringArray(value: unknown): value is string[] {
 
 function isScore(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+function normalizeInlineText(value: string) {
+  return value.replace(/\s+/g, " ").trim();
 }
 
 function validateRecommendationPayload(payload: RecommendationResponse) {
@@ -50,6 +56,12 @@ function validateRecommendationPayload(payload: RecommendationResponse) {
       !isNonEmptyString(phone.amazonSearchQuery)
     ) {
       throw new Error(`Phone payload is missing required string fields for rank ${phone.rank}.`);
+    }
+
+    if (normalizeInlineText(phone.whyThisPhone).length > WHY_THIS_PHONE_MAX_CHARS) {
+      throw new Error(
+        `whyThisPhone must be ${WHY_THIS_PHONE_MAX_CHARS} characters or fewer for rank ${phone.rank}.`
+      );
     }
 
     if (!phone.price.startsWith("₹")) {
@@ -175,7 +187,7 @@ Recommend exactly 3 phones available in India in 2025-2026 within or close to th
       "price": "₹XX,XXX",
       "priceNumeric": 12345,
       "tagline": "Short catchy tagline",
-      "whyThisPhone": "2-3 sentences explaining why this phone is perfect for the user's specific needs",
+      "whyThisPhone": "1-2 concise sentences, max 200 characters, explaining why this phone fits the user's specific needs",
       "specs": {
         "display": "e.g. 6.7 inch AMOLED 120Hz",
         "processor": "e.g. Snapdragon 8 Gen 3",
@@ -206,6 +218,7 @@ Recommend exactly 3 phones available in India in 2025-2026 within or close to th
 Rules:
 - Set isBestPick: true only for rank 1.
 - Make whyThisPhone genuinely personalised to the user's priorities.
+- whyThisPhone must be 200 characters or fewer, including spaces. Do not exceed this limit.
 - amazonSearchQuery should be the exact phone name.
 - All scores and matchScore must be between 0 and 100.
 - matchReasons, avoidIf, and bestFor should be concise and useful.

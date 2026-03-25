@@ -42,9 +42,9 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className={`${publicSans.variable} ${dmMono.variable} min-h-screen font-sans antialiased`}>
+      <body className={`${publicSans.variable} ${dmMono.variable} min-h-screen overflow-hidden font-sans antialiased`}>
         <Providers>
-          <main className="min-h-screen">{children}</main>
+          <main className="h-dvh overflow-hidden">{children}</main>
         </Providers>
       </body>
     </html>

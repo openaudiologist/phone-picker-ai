@@ -73,7 +73,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-dvh">
+    <div className="h-full overflow-hidden">
       <GuidedChat
         loading={loading}
         results={results}

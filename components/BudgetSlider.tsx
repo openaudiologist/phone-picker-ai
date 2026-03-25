@@ -17,10 +17,10 @@ function formatBudget(value: number): string {
 
 export default function BudgetSlider({ value, onChange }: BudgetSliderProps) {
   return (
-    <Card className="border-border/70 bg-secondary/40">
+    <Card className="bg-secondary/40">
       <CardContent className="space-y-6 p-5">
         <div className="text-center">
-          <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="text-xs font-medium text-muted-foreground">
             Exact budget
           </p>
           <div className="mt-3 text-4xl font-semibold tracking-tight text-foreground">
@@ -36,7 +36,7 @@ export default function BudgetSlider({ value, onChange }: BudgetSliderProps) {
           onValueChange={(nextValue) => onChange(nextValue[0] ?? value)}
         />
 
-        <div className="flex justify-between text-[11px] font-medium text-muted-foreground">
+        <div className="flex justify-between text-xs font-medium text-muted-foreground">
           <span>₹5k</span>
           <span>₹25k</span>
           <span>₹50k</span>

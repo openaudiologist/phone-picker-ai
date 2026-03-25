@@ -2,8 +2,18 @@
 
 import { ArrowRight } from "lucide-react";
 import type { ChatStepId } from "@/types";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 interface SummaryItem {
   label: string;
@@ -27,49 +37,58 @@ export default function SummaryCard({
   disabled = false,
 }: SummaryCardProps) {
   return (
-    <Card className="border-border/70 bg-card/90 shadow-lg">
-      <CardHeader className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Summary</p>
-        <CardTitle className="text-lg">Ready to shortlist your best phones</CardTitle>
-        <p className="text-sm leading-6 text-muted-foreground">
-          This is the final brief I’ll send for recommendations. Edit anything, or launch the shortlist.
-        </p>
+    <Card size="sm" className="gap-2">
+      <CardHeader className="gap-1 px-3">
+        <div>
+          <Badge variant="secondary" className="h-5 px-1.5 text-xs">Summary</Badge>
+        </div>
+        <CardTitle className="text-sm">Ready to shortlist your best phones</CardTitle>
+        <CardDescription className="text-xs leading-4">
+          Final brief before recommendations. Tweak any answer or launch the shortlist.
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-5">
-        <div className="space-y-3">
-        {items.map((item) => (
-          <div
-            key={item.label}
-            className="rounded-3xl border border-border/70 bg-secondary/35 p-4"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">{item.label}</div>
-                <p className="m-0 text-sm leading-6 text-foreground">
-                  {item.value}
-                </p>
+      <CardContent className="space-y-2 px-3">
+        <Separator className="bg-border/70" />
+
+        <div className="grid gap-0.5">
+          {items.map((item) => (
+            <div
+              key={item.label}
+              className={cn(
+                "flex items-start justify-between gap-3 rounded-lg px-2 py-2",
+                item.stepId ? "hover:bg-muted/35" : ""
+              )}
+            >
+              <div className="min-w-0 space-y-0.5">
+                <div className="text-xs text-muted-foreground">{item.label}</div>
+                <div className="text-sm font-medium leading-tight text-foreground">{item.value}</div>
               </div>
 
               {item.stepId && onEditStep ? (
-                <Button type="button" variant="ghost" size="sm" className="shrink-0 rounded-full" onClick={() => onEditStep(item.stepId!)}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  className="mt-0.5 shrink-0"
+                  onClick={() => onEditStep(item.stepId!)}
+                >
                   Edit
                 </Button>
               ) : null}
             </div>
-          </div>
-        ))}
+          ))}
         </div>
+      </CardContent>
 
-        <div className="flex flex-col gap-3 pt-1 sm:flex-row">
-          <Button type="button" onClick={onConfirm} className="rounded-full sm:min-w-[220px]" disabled={disabled}>
+      <CardFooter className="flex-col gap-2 border-0 bg-transparent px-3 pb-3 pt-0 sm:flex-row">
+        <Button type="button" onClick={onConfirm} className="w-full sm:flex-1" disabled={disabled}>
             Find my best phones
             <ArrowRight className="h-4 w-4" />
           </Button>
-          <Button type="button" onClick={onEditAnswers} variant="secondary" className="rounded-full sm:min-w-[150px]" disabled={disabled}>
+          <Button type="button" onClick={onEditAnswers} variant="secondary" className="w-full sm:flex-1" disabled={disabled}>
             Edit answers
           </Button>
-        </div>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }

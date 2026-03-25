@@ -1,7 +1,16 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Check, PencilLine } from "lucide-react";
+import {
+  ArrowLeft,
+  BatteryFull,
+  Camera,
+  Check,
+  Cpu,
+  IndianRupee,
+  MonitorSmartphone,
+  PencilLine,
+} from "lucide-react";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import {
   AssistantRuntimeProvider,
@@ -16,6 +25,8 @@ import ResultActions from "@/components/chat/ResultActions";
 import SummaryCard from "@/components/chat/SummaryCard";
 import YoutubeInsightCard from "@/components/chat/YoutubeInsightCard";
 import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import {
   Card,
@@ -68,6 +79,20 @@ interface GuidedChatProps {
 
 function CompareCard({ results }: { results: RecommendationResponse }) {
   const categories = ["camera", "battery", "performance", "value", "display"] as const;
+  const categoryIcons = {
+    camera: Camera,
+    battery: BatteryFull,
+    performance: Cpu,
+    value: IndianRupee,
+    display: MonitorSmartphone,
+  } as const;
+  const categoryLabels = {
+    camera: "camera",
+    battery: "battery",
+    performance: "speed",
+    value: "value",
+    display: "display",
+  } as const;
 
   const winners = categories.map((category) => {
     const winner = [...results.phones].sort(
@@ -81,24 +106,21 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
   });
 
   return (
-    <Card className="border-border/70 bg-card/85">
-      <CardHeader className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">Comparison view</p>
-        <CardTitle className="text-base">Score winners across the shortlist</CardTitle>
-        <CardDescription className="text-sm leading-6">
-          Quick score-based winners across the three recommended phones. No extra AI call needed.
-        </CardDescription>
+    <Card>
+      <CardHeader className="gap-1">
+        <p className="text-xs font-medium text-muted-foreground">Comparison view</p>
+        <CardTitle className="text-base">Score winners at a glance</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">
-      <div className="overflow-x-auto">
-        <div className="min-w-[620px] space-y-2">
+      <ScrollArea className="w-full whitespace-nowrap rounded-lg">
+        <div className="min-w-[620px] space-y-2 pb-2">
           <div className="grid grid-cols-[140px_repeat(3,minmax(140px,1fr))] gap-2 px-1">
-            <div className="self-end px-3 pb-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Category</div>
+            <div className="self-end px-3 pb-2 text-xs font-medium text-muted-foreground">Category</div>
             {results.phones.map((phone) => (
-              <div key={phone.name} className="rounded-2xl border border-border/70 bg-secondary/35 px-3 py-3 text-center">
+              <div key={phone.name} className="rounded-lg bg-muted px-3 py-3 text-center">
                 <div className="text-sm font-medium text-foreground">{phone.name}</div>
-                <div className="mt-1 text-[11px] text-muted-foreground">{phone.price}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{phone.price}</div>
               </div>
             ))}
           </div>
@@ -108,7 +130,7 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
 
             return (
               <div key={category} className="grid grid-cols-[140px_repeat(3,minmax(140px,1fr))] gap-2 px-1">
-                <div className="flex items-center rounded-2xl border border-border/70 bg-secondary/35 px-3 py-3 text-sm capitalize text-muted-foreground">
+                <div className="flex items-center rounded-lg bg-muted px-3 py-3 text-sm capitalize text-muted-foreground">
                   {category}
                 </div>
                 {results.phones.map((phone) => {
@@ -118,14 +140,14 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
                     <div
                       key={`${phone.name}-${category}`}
                       className={cn(
-                        "rounded-2xl border px-3 py-3 text-center transition-colors",
+                        "rounded-lg px-3 py-3 text-center transition-colors",
                         isWinner
-                          ? "border-primary/25 bg-primary/10"
-                          : "border-border/70 bg-secondary/35"
+                          ? "bg-primary/10 ring-1 ring-primary/25"
+                          : "bg-muted"
                       )}
                     >
                       <div className="text-sm font-medium text-foreground">{phone.scores[category]}</div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
+                      <div className="mt-1 text-xs text-muted-foreground">
                         {isWinner ? "Best value here" : "Competitive"}
                       </div>
                     </div>
@@ -135,20 +157,29 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
             );
           })}
         </div>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {winners.map(({ category, phone }) => (
-          <div key={category} className="rounded-3xl border border-border/70 bg-secondary/35 p-4">
-            <div className="mb-2 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Best {category}
+        {winners.map(({ category, phone }) => {
+          const CategoryIcon = categoryIcons[category];
+          const categoryLabel = categoryLabels[category];
+
+          return (
+          <div key={category} className="rounded-lg bg-muted p-4">
+            <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <CategoryIcon className="h-3.5 w-3.5" />
+              <span>Best {categoryLabel}</span>
             </div>
             <h4 className="mb-1 text-sm font-semibold text-foreground">{phone.name}</h4>
-            <p className="text-xs text-muted-foreground">
-              Score: {phone.scores[category]}/100
-            </p>
+            <div className="flex items-center gap-2">
+              <Progress value={phone.scores[category]} className="h-1.5 flex-1" />
+              <span className="min-w-7 text-right text-xs font-medium text-foreground">
+                {phone.scores[category]}
+              </span>
+            </div>
           </div>
-        ))}
+        )})}
       </div>
       </CardContent>
     </Card>
@@ -214,6 +245,8 @@ export default function GuidedChat({
   const [draftBudget, setDraftBudget] = useState(DEFAULT_GUIDED_ANSWERS.budget);
   const [exactBudgetMode, setExactBudgetMode] = useState(false);
   const [showCompare, setShowCompare] = useState(false);
+  const [resultAccessoryOrder, setResultAccessoryOrder] = useState<Array<"compare" | "youtube">>([]);
+  const [currentResultIndex, setCurrentResultIndex] = useState(0);
   const [youtubeInsights, setYoutubeInsights] = useState<YoutubeInsightResponse[]>([]);
   const [youtubeLoading, setYoutubeLoading] = useState(false);
 
@@ -271,23 +304,20 @@ export default function GuidedChat({
     setDraftBudget(DEFAULT_GUIDED_ANSWERS.budget);
     setExactBudgetMode(false);
     setShowCompare(false);
+    setResultAccessoryOrder([]);
+    setCurrentResultIndex(0);
     setYoutubeInsights([]);
     setYoutubeLoading(false);
     loadingMessageIdRef.current = null;
     resultsMessageIdRef.current = null;
     resultSignatureRef.current = null;
     errorRef.current = null;
-    const welcomeMessage = createPromptMessage("welcome");
-    setMessages([welcomeMessage]);
+    setMessages([]);
   }, []);
 
   useEffect(() => {
     if (bootstrappedRef.current) return;
     bootstrappedRef.current = true;
-    const timer = setTimeout(() => {
-      setMessages([createPromptMessage("welcome")]);
-    }, 1500);
-    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -315,7 +345,7 @@ export default function GuidedChat({
         setDraftSingleValue(answers.brandPreference);
         break;
       case "upgrade_tier":
-        setDraftSingleValue(answers.upgradeTier ?? null);
+        setDraftSingleValue(answers.upgradeTier ?? "Skip");
         break;
       case "camera_priority":
         setDraftSingleValue(answers.cameraPriority ?? null);
@@ -331,6 +361,10 @@ export default function GuidedChat({
   useEffect(() => {
     if (currentStep === "budget") {
       setDraftBudget(answers.budget);
+      const hasPresetMatch = BUDGET_OPTIONS.some(
+        (option) => typeof option.value === "number" && option.value === answers.budget
+      );
+      setExactBudgetMode(!hasPresetMatch);
     }
   }, [answers.budget, currentStep]);
 
@@ -341,7 +375,7 @@ export default function GuidedChat({
     const loadingMessage = appendMessage(
       createChatMessage({
         role: "assistant",
-        text: "Perfect — I’m comparing the strongest matches for you now.",
+        text: "Perfect — I'm comparing the strongest matches for you now.",
         kind: "status",
       })
     );
@@ -374,6 +408,11 @@ export default function GuidedChat({
     resultsMessageIdRef.current = resultMessage.id;
     loadingMessageIdRef.current = null;
     errorRef.current = null;
+    setShowCompare(false);
+    setResultAccessoryOrder([]);
+    setYoutubeInsights([]);
+    setYoutubeLoading(false);
+    setCurrentResultIndex(0);
     setCurrentStep("results");
   }, [appendMessage, results]);
 
@@ -504,7 +543,7 @@ export default function GuidedChat({
 
     setShowCompare(false);
     setYoutubeInsights([]);
-    moveToStep(previousStep, "No problem — let’s revise that.");
+    moveToStep(previousStep, "No problem — let's revise that.");
   }, [answers, currentStep, moveToStep]);
 
   const handleEditSpecificStep = useCallback(
@@ -515,7 +554,7 @@ export default function GuidedChat({
 
       setShowCompare(false);
       setYoutubeInsights([]);
-      moveToStep(stepId, "Sure — let’s update that.");
+      moveToStep(stepId, "Sure — let's update that.");
     },
     [moveToStep, onStartOver, results]
   );
@@ -527,7 +566,7 @@ export default function GuidedChat({
 
     setShowCompare(false);
     setYoutubeInsights([]);
-    moveToStep("budget", "Let’s refine your answers from the top.");
+    moveToStep("budget", "Let's refine your answers from the top.");
   }, [moveToStep, onStartOver, results]);
 
   const handleFinalSubmit = useCallback(async () => {
@@ -543,6 +582,13 @@ export default function GuidedChat({
     onStartOver();
     resetConversation();
   }, [onStartOver, resetConversation]);
+
+  const handleCompare = useCallback(() => {
+    setShowCompare(true);
+    setResultAccessoryOrder((currentOrder) =>
+      currentOrder.includes("compare") ? currentOrder : [...currentOrder, "compare"]
+    );
+  }, []);
 
   const handleLocalRefinement = useCallback(
     (intent: "battery" | "camera" | "cheaper") => {
@@ -567,6 +613,9 @@ export default function GuidedChat({
     if (!results || !onFetchYoutubeInsights || youtubeLoading) return;
     if (youtubeInsights.length > 0) return;
 
+    setResultAccessoryOrder((currentOrder) =>
+      currentOrder.includes("youtube") ? currentOrder : [...currentOrder, "youtube"]
+    );
     setYoutubeLoading(true);
     try {
       const fetchedInsights = await onFetchYoutubeInsights(
@@ -579,8 +628,8 @@ export default function GuidedChat({
           role: "assistant",
           text:
             fetchError instanceof Error
-              ? `I couldn’t load YouTube review signals right now: ${fetchError.message}`
-              : "I couldn’t load YouTube review signals right now.",
+              ? `I couldn't load YouTube review signals right now: ${fetchError.message}`
+              : "I couldn't load YouTube review signals right now.",
           kind: "status",
         })
       );
@@ -633,10 +682,10 @@ export default function GuidedChat({
       return (
         <StepFooter title="Recommendation issue" subtitle="You can retry the final fetch or adjust your answers locally.">
           <div className="flex flex-wrap gap-3">
-            <Button type="button" className="rounded-2xl" onClick={handleRetry}>
+            <Button type="button" onClick={handleRetry}>
               Try again
             </Button>
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleEditAnswers}>
+            <Button type="button" variant="secondary" onClick={handleEditAnswers}>
               Edit answers
             </Button>
           </div>
@@ -647,11 +696,10 @@ export default function GuidedChat({
     if (results) {
       return (
         <ResultActions
-          onCompare={() => setShowCompare((currentValue) => !currentValue)}
-          onBatteryRefine={() => handleLocalRefinement("battery")}
-          onCameraRefine={() => handleLocalRefinement("camera")}
-          onCheaperRefine={() => handleLocalRefinement("cheaper")}
+          onCompare={handleCompare}
+          showCompare={!showCompare}
           onPeopleSaying={handlePeopleSaying}
+          showPeopleSaying={!youtubeLoading && youtubeInsights.length === 0}
           onStartOver={handleFullReset}
           onEditAnswers={handleEditAnswers}
         />
@@ -674,7 +722,7 @@ export default function GuidedChat({
         <StepFooter title="Budget" subtitle="Choose a range, or switch to the slider for an exact budget.">
           <OptionChips
             options={BUDGET_OPTIONS}
-            selectedValues={exactBudgetMode ? ["exact-budget"] : []}
+            selectedValues={exactBudgetMode ? ["exact-budget"] : [draftBudget]}
             onSelect={(option) => {
               if (option.value === "exact-budget") {
                 setExactBudgetMode(true);
@@ -690,11 +738,11 @@ export default function GuidedChat({
             <div className="space-y-4">
               <BudgetSlider value={draftBudget} onChange={setDraftBudget} />
               <div className="flex flex-wrap gap-3">
-                <Button type="button" className="rounded-2xl" onClick={() => handleAnswer("budget", draftBudget)}>
+                <Button type="button" onClick={() => handleAnswer("budget", draftBudget)}>
                   <Check className="h-4 w-4" />
                   Continue
                 </Button>
-                <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+                <Button type="button" variant="secondary" onClick={handleBack}>
                   <ArrowLeft className="h-4 w-4" />
                   Back
                 </Button>
@@ -702,7 +750,7 @@ export default function GuidedChat({
             </div>
           ) : (
             <div className="flex flex-wrap gap-3">
-              <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+              <Button type="button" variant="secondary" onClick={handleBack}>
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
@@ -734,12 +782,12 @@ export default function GuidedChat({
               type="button"
               onClick={() => handleAnswer("primary_use", draftSelections)}
               disabled={!canContinueMultiSelect}
-              className="rounded-2xl"
+             
             >
               <Check className="h-4 w-4" />
               Continue
             </Button>
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+            <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -757,7 +805,7 @@ export default function GuidedChat({
             onSelect={(option) => handleAnswer("brand", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+            <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -775,7 +823,7 @@ export default function GuidedChat({
             onSelect={(option) => handleAnswer("upgrade_tier", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+            <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -786,7 +834,7 @@ export default function GuidedChat({
 
     if (currentStep === "pain_points") {
       return (
-        <StepFooter title="Pain points" subtitle="Pick what annoyed you most, or skip if you’re just ready for a clean upgrade.">
+        <StepFooter title="Pain points" subtitle="Pick what annoyed you most, or skip if you're just ready for a clean upgrade.">
           <OptionChips
             options={(activeStepDefinition?.options ?? []).filter((option) => option.value !== "Skip")}
             selectedValues={draftSelections}
@@ -801,14 +849,14 @@ export default function GuidedChat({
             }}
           />
           <div className="flex flex-wrap gap-3">
-            <Button type="button" className="rounded-2xl" onClick={() => handleAnswer("pain_points", draftSelections)}>
+            <Button type="button" onClick={() => handleAnswer("pain_points", draftSelections)}>
               <Check className="h-4 w-4" />
               Continue
             </Button>
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={() => handleAnswer("pain_points", [])}>
+            <Button type="button" variant="secondary" onClick={() => handleAnswer("pain_points", [])}>
               Skip
             </Button>
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+            <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -834,11 +882,11 @@ export default function GuidedChat({
             }}
           />
           <div className="flex flex-wrap gap-3">
-            <Button type="button" className="rounded-2xl" onClick={() => handleAnswer("must_have", draftSelections)}>
+            <Button type="button" onClick={() => handleAnswer("must_have", draftSelections)}>
               <Check className="h-4 w-4" />
               Continue
             </Button>
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+            <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -856,7 +904,7 @@ export default function GuidedChat({
             onSelect={(option) => handleAnswer("camera_priority", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+            <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -874,7 +922,7 @@ export default function GuidedChat({
             onSelect={(option) => handleAnswer("gaming_priority", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
-            <Button type="button" variant="secondary" className="rounded-2xl" onClick={handleBack}>
+            <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
@@ -906,6 +954,7 @@ export default function GuidedChat({
     exactBudgetMode,
     handleAnswer,
     handleBack,
+    handleCompare,
     handleEditAnswers,
     handleEditSpecificStep,
     handleFinalSubmit,
@@ -915,7 +964,10 @@ export default function GuidedChat({
     handleRetry,
     loading,
     results,
+    showCompare,
     summaryItems,
+    youtubeInsights.length,
+    youtubeLoading,
   ]);
 
   const renderAccessory = useCallback(
@@ -927,19 +979,41 @@ export default function GuidedChat({
       }
 
       if (results && message.id === resultsMessageIdRef.current) {
+        const currentPhone = results.phones[currentResultIndex] ?? results.phones[0];
+
         return (
           <div className="space-y-4">
-            <div className="flex flex-col gap-4">
-              {results.phones.map((phone) => (
-                <PhoneCard key={phone.name} phone={phone} budget={answers.budget} />
-              ))}
-            </div>
-            {showCompare ? <CompareCard results={results} /> : null}
-            {(youtubeLoading || youtubeInsights.length > 0) ? (
-              <YoutubeInsightCard insights={youtubeInsights} loading={youtubeLoading} />
-            ) : null}
+            <PhoneCard
+              key={currentPhone.name}
+              phone={currentPhone}
+              budget={answers.budget}
+              pagination={{
+                currentIndex: currentResultIndex,
+                total: results.phones.length,
+                onPrevious: () => setCurrentResultIndex((value) => Math.max(value - 1, 0)),
+                onNext: () => setCurrentResultIndex((value) => Math.min(value + 1, results.phones.length - 1)),
+              }}
+            />
+            {resultAccessoryOrder.map((panel) => {
+              if (panel === "compare") {
+                return showCompare ? <CompareCard key="compare" results={results} /> : null;
+              }
+
+              if (panel === "youtube") {
+                return youtubeLoading || youtubeInsights.length > 0 ? (
+                  <YoutubeInsightCard
+                    key="youtube"
+                    insights={youtubeInsights}
+                    loading={youtubeLoading}
+                    bestMatchPhoneName={results.phones.find((phone) => phone.isBestPick)?.name}
+                  />
+                ) : null;
+              }
+
+              return null;
+            })}
             {isLastAssistant && footerContent ? (
-              <div className="pt-2">{footerContent}</div>
+              <div className="pt-1">{footerContent}</div>
             ) : null}
           </div>
         );
@@ -951,12 +1025,12 @@ export default function GuidedChat({
 
       return null;
     },
-    [answers.budget, footerContent, lastAssistantMessageId, loading, results, showCompare, youtubeInsights, youtubeLoading]
+    [answers.budget, currentResultIndex, footerContent, lastAssistantMessageId, loading, resultAccessoryOrder, results, showCompare, youtubeInsights, youtubeLoading]
   );
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <Thread renderAccessory={renderAccessory} welcomeFooter={footerContent} />
+      <Thread renderAccessory={renderAccessory} welcomeFooter={footerContent} scrollTrigger={messages.length} />
     </AssistantRuntimeProvider>
   );
 }
