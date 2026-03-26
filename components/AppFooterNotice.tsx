@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Info } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 export default function AppFooterNotice() {
@@ -9,22 +8,17 @@ export default function AppFooterNotice() {
         size="sm"
         role="note"
         aria-label="PhonePicker AI disclaimer"
-        className="pointer-events-auto max-w-[min(960px,calc(100vw-1.5rem))] border-border/70 bg-background/88 px-3 py-2 text-[11px] leading-4 text-muted-foreground shadow-lg backdrop-blur-md sm:max-w-[min(1100px,calc(100vw-2rem))] sm:px-4"
+        className="pointer-events-auto max-w-[min(960px,calc(100vw-1.5rem))] border-border/70 bg-background/88 px-2.5 py-1.5 text-[10px] leading-tight text-muted-foreground shadow-lg backdrop-blur-md sm:max-w-[min(1100px,calc(100vw-2rem))] sm:px-3 sm:py-2 sm:text-[11px]"
       >
-        <div className="flex flex-col items-center gap-1 text-center">
-          <div className="flex items-start justify-center gap-2 sm:items-center">
-            <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary sm:mt-0" />
-            <p>
-              Amazon Associate · Earnings from qualifying purchases.{" "}
-              <Link
-                href="/privacy"
-                className="underline underline-offset-2 hover:text-foreground"
-              >
-                Privacy&nbsp;Policy
-              </Link>
-            </p>
-          </div>
-        </div>
+        <p className="text-center">
+          Amazon Associate · Earnings from qualifying purchases.{" "}
+          <Link
+            href="/privacy"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            Privacy&nbsp;Policy
+          </Link>
+        </p>
       </Card>
     </div>
   );
