@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { handleAmazonDeepLink } from "@/lib/amazon";
 import {
   trackAffiliateBannerClick,
   trackAffiliateBannerImpression,
@@ -95,7 +96,7 @@ export default function AmazonBanner({
               href={href}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              onClick={() => trackAffiliateBannerClick(placement, variant)}
+              onClick={(e) => { trackAffiliateBannerClick(placement, variant); handleAmazonDeepLink(href, e); }}
             >
               {ctaText}
               <ExternalLink className="h-4 w-4" />

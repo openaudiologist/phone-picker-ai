@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getBestAmazonUrl } from "@/lib/amazon";
+import { getBestAmazonUrl, handleAmazonDeepLink } from "@/lib/amazon";
 import { trackPhoneClick } from "@/lib/tracking";
 import type { AmazonMarketPick } from "@/types";
 
@@ -18,6 +18,10 @@ interface AmazonProductStripProps {
 }
 
 const EDGE_OFFSET = 8;
+
+const CARD_WIDTH = 176;
+const CARD_GAP = 12; // gap-3
+const SCROLL_STEP = CARD_WIDTH + CARD_GAP;
 
 function LoadingCard() {
   return (
@@ -139,9 +143,8 @@ export default function AmazonProductStrip({
         return;
       }
 
-      const distance = Math.max(viewport.clientWidth * 0.82, 180);
       viewport.scrollBy({
-        left: direction === "next" ? distance : -distance,
+        left: direction === "next" ? SCROLL_STEP : -SCROLL_STEP,
         behavior: "smooth",
       });
     },
@@ -212,7 +215,7 @@ export default function AmazonProductStrip({
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer sponsored"
-                        onClick={() => trackPhoneClick(phone.name, index + 1, 0)}
+                        onClick={(e) => { trackPhoneClick(phone.name, index + 1, 0); handleAmazonDeepLink(href, e); }}
                         className="block"
                       >
                         <Card

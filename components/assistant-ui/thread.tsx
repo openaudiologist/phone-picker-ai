@@ -294,7 +294,7 @@ const MessageAccessoryInner: FC<{
   const accessory = renderAccessory(externalMessage);
   if (!accessory) return null;
 
-  return <div className="mt-4 pl-11">{accessory}</div>;
+  return <div className="mt-4 pl-0 sm:pl-11">{accessory}</div>;
 };
 
 function ThreadWelcome() {

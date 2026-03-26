@@ -4,7 +4,7 @@ import { ExternalLink, Headphones, Shield, Zap, Crown } from "lucide-react";
 import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { getAccessoryUrl, BOUNTY_LINKS } from "@/lib/amazon";
+import { getAccessoryUrl, BOUNTY_LINKS, handleAmazonDeepLink } from "@/lib/amazon";
 import { trackAccessoryClick, trackBountyClick } from "@/lib/tracking";
 
 interface AccessoryCrossSellProps {
@@ -48,7 +48,7 @@ export default function AccessoryCrossSell({ phoneName }: AccessoryCrossSellProp
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer sponsored"
-                onClick={() => trackAccessoryClick(cat.key, "post_results")}
+                onClick={(e) => { trackAccessoryClick(cat.key, "post_results"); handleAmazonDeepLink(href, e); }}
                 className="block h-full"
               >
                 <Card
@@ -72,7 +72,7 @@ export default function AccessoryCrossSell({ phoneName }: AccessoryCrossSellProp
         href={BOUNTY_LINKS.prime}
         target="_blank"
         rel="noopener noreferrer sponsored"
-        onClick={() => trackBountyClick("prime")}
+        onClick={(e) => { trackBountyClick("prime"); handleAmazonDeepLink(BOUNTY_LINKS.prime, e); }}
         className="block"
       >
         <Card

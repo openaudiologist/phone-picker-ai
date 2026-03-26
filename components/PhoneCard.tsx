@@ -24,7 +24,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { getBestAmazonUrl } from "@/lib/amazon";
+import { getBestAmazonUrl, handleAmazonDeepLink } from "@/lib/amazon";
 import { trackPhoneClick } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import type { PhoneRecommendation } from "@/types";
@@ -117,8 +117,9 @@ export default function PhoneCard({
   const [activeDetailTab, setActiveDetailTab] = useState<"scores" | "strengths" | "whyfits">("strengths");
   const amazonHref = getBestAmazonUrl(phone.amazonSearchQuery);
 
-  const handleBuyClick = () => {
+  const handleBuyClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     trackPhoneClick(phone.name, phone.rank, budget);
+    handleAmazonDeepLink(amazonHref, e);
   };
 
   const detailReasons = phone.matchReasons?.length ? phone.matchReasons : phone.pros;

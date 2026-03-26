@@ -7,7 +7,7 @@ export default function AppFooterNotice() {
       <Card
         role="note"
         aria-label="PhonePicker AI disclaimer"
-        className="pointer-events-auto max-w-[min(960px,calc(100vw-1.5rem))] border-border/70 bg-background/88 px-2 py-1 text-[8px] leading-none text-muted-foreground shadow-lg backdrop-blur-md sm:max-w-[min(1100px,calc(100vw-2rem))] sm:px-3 sm:py-1.5 sm:text-[10px]"
+        className="pointer-events-auto max-w-[min(960px,calc(100vw-1.5rem))] border-border/70 bg-background/88 px-2 py-1 text-[10px] leading-none text-muted-foreground shadow-lg backdrop-blur-md sm:max-w-[min(1100px,calc(100vw-2rem))] sm:px-3 sm:py-1.5 sm:text-[12px]"
       >
         <p className="whitespace-nowrap text-center">
           Amazon Associate · Earnings from qualifying purchases. <Link
