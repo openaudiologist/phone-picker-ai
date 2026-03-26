@@ -9,7 +9,7 @@ import {
   getAmazonCategoryUrl,
   getAmazonTodaysDealUrl,
 } from "@/lib/amazon";
-import { trackFormComplete } from "@/lib/tracking";
+import { trackFormComplete, trackRecommendationError } from "@/lib/tracking";
 import type {
   FormData,
   RecommendationErrorState,
@@ -90,7 +90,9 @@ export default function Home() {
 
       if (!res.ok) {
         const errBody = await res.json().catch(() => null);
-        setError(getRecommendationErrorState(errBody));
+        const errorState = getRecommendationErrorState(errBody);
+        trackRecommendationError(errorState.type);
+        setError(errorState);
         return;
       }
 
@@ -99,12 +101,14 @@ export default function Home() {
       setStripRefreshKey((k) => k + 1);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
+        trackRecommendationError("timeout");
         setError({
           type: "technical",
           message:
             "This shortlist is taking longer than expected, so I stopped the request instead of leaving you stuck on loading. Please try again or tweak your answers for a faster match.",
         });
       } else {
+        trackRecommendationError("network");
         setError(getRecommendationErrorFromCatch(err));
       }
     } finally {

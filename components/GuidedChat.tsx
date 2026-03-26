@@ -57,6 +57,12 @@ import {
   normalizeSkipValue,
 } from "@/lib/chat-helpers";
 import { cn } from "@/lib/utils";
+import {
+  trackResultAction,
+  trackPhonePagination,
+  trackStepComplete,
+  trackRecommendationError,
+} from "@/lib/tracking";
 import type {
   ChatFlowMessage,
   ChatStepId,
@@ -540,6 +546,7 @@ export default function GuidedChat({
         responseLabel = normalizeSkipValue(value) ?? "Skipped";
       }
 
+      trackStepComplete(stepId);
       appendMessage(createUserAnswerMessage(stepId, responseLabel));
       advanceAfterAnswer(stepId, nextAnswers);
     },
@@ -569,6 +576,7 @@ export default function GuidedChat({
   );
 
   const handleEditAnswers = useCallback(() => {
+    trackResultAction("edit_answers");
     if (results || error) {
       onStartOver();
     }
@@ -588,11 +596,13 @@ export default function GuidedChat({
   }, [answers, onSubmitFinal]);
 
   const handleFullReset = useCallback(() => {
+    trackResultAction("start_over");
     onStartOver();
     resetConversation();
   }, [onStartOver, resetConversation]);
 
   const handleCompare = useCallback(() => {
+    trackResultAction("compare");
     setShowCompare(true);
     setResultAccessoryOrder((currentOrder) =>
       currentOrder.includes("compare") ? currentOrder : [...currentOrder, "compare"]
@@ -622,6 +632,7 @@ export default function GuidedChat({
     if (!results || !onFetchYoutubeInsights || youtubeLoading) return;
     if (youtubeInsights.length > 0) return;
 
+    trackResultAction("youtube_insights");
     setResultAccessoryOrder((currentOrder) =>
       currentOrder.includes("youtube") ? currentOrder : [...currentOrder, "youtube"]
     );
@@ -1053,8 +1064,18 @@ export default function GuidedChat({
               pagination={{
                 currentIndex: currentResultIndex,
                 total: results.phones.length,
-                onPrevious: () => setCurrentResultIndex((value) => Math.max(value - 1, 0)),
-                onNext: () => setCurrentResultIndex((value) => Math.min(value + 1, results.phones.length - 1)),
+                onPrevious: () =>
+                  setCurrentResultIndex((value) => {
+                    const next = Math.max(value - 1, 0);
+                    trackPhonePagination(results.phones[next].name, next);
+                    return next;
+                  }),
+                onNext: () =>
+                  setCurrentResultIndex((value) => {
+                    const next = Math.min(value + 1, results.phones.length - 1);
+                    trackPhonePagination(results.phones[next].name, next);
+                    return next;
+                  }),
               }}
             />
             {resultAccessoryOrder.map((panel) => {

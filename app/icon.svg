@@ -1,4 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#1a1a1a"/>
-  <text x="16" y="23" text-anchor="middle" font-family="system-ui,sans-serif" font-size="20" font-weight="700" fill="#f59e0b">P</text>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_2)">
+<path d="M24 0H8C3.58172 0 0 3.58172 0 8V24C0 28.4183 3.58172 32 8 32H24C28.4183 32 32 28.4183 32 24V8C32 3.58172 28.4183 0 24 0Z" fill="#E17100"/>
+<path d="M17.2324 7.78395H14.7676C12.8311 7.78395 11.8624 7.78395 11.261 8.38537C10.6596 8.98678 10.6596 9.95545 10.6596 11.892V20.108C10.6596 22.0446 10.6596 23.0124 11.261 23.6146C11.8624 24.2169 12.8311 24.2161 14.7676 24.2161H17.2324C19.1689 24.2161 20.1368 24.2161 20.739 23.6146C21.3404 23.0124 21.3404 22.0446 21.3404 20.108V11.892C21.3404 9.95545 21.3404 8.98678 20.739 8.38537C20.1368 7.78395 19.1689 7.78395 17.2324 7.78395Z" fill="white" stroke="white" stroke-width="1.23241" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M16 21.7512H16.0077Z" fill="#E17100"/>
+<path d="M16 21.7512H16.0077" stroke="#E17100" stroke-width="1.64321" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_6_2">
+<rect width="32" height="32" fill="white"/>
+</clipPath>
+</defs>
 </svg>

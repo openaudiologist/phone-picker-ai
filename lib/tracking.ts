@@ -50,3 +50,19 @@ export function trackAccessoryClick(category: string, placement: string) {
 export function trackBountyClick(bountyType: string) {
   ga("event", "bounty_click", { bounty_type: bountyType });
 }
+
+export function trackResultAction(action: string) {
+  ga("event", "result_action", { action });
+}
+
+export function trackPhonePagination(phoneName: string, index: number) {
+  ga("event", "phone_pagination", { phone_name: phoneName, index });
+}
+
+export function trackStepComplete(stepId: string) {
+  ga("event", "step_complete", { step_id: stepId });
+}
+
+export function trackRecommendationError(errorType: string) {
+  ga("event", "recommendation_error", { error_type: errorType });
+}
