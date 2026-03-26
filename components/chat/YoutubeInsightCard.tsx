@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BookOpenText, Loader2 } from "lucide-react";
+import { BookOpenText } from "lucide-react";
 import type { YoutubeInsightResponse } from "@/types";
+import AiStatusCard from "@/components/AiStatusCard";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -12,7 +12,7 @@ const youtubeLoadingMessages = [
   "Pulling standout review highlights",
   "Checking what reviewers keep repeating",
   "Summarizing the strongest review signals",
-];
+ ] as const;
 
 interface YoutubeInsightCardProps {
   insights: YoutubeInsightResponse[];
@@ -27,21 +27,6 @@ export default function YoutubeInsightCard({
   emptyMessage = "No review insights yet.",
   bestMatchPhoneName,
 }: YoutubeInsightCardProps) {
-  const [messageIndex, setMessageIndex] = useState(0);
-
-  useEffect(() => {
-    if (!loading) {
-      setMessageIndex(0);
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % youtubeLoadingMessages.length);
-    }, 1800);
-
-    return () => clearInterval(interval);
-  }, [loading]);
-
   return (
     <Card>
       <CardHeader className="gap-1">
@@ -51,14 +36,7 @@ export default function YoutubeInsightCard({
       <CardContent className="space-y-4">
 
       {loading ? (
-        <Card size="sm" className="gap-0 bg-muted/35 py-0 ring-1 ring-border/60">
-          <CardContent className="flex items-center gap-2.5 p-3">
-            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
-            <span className="text-sm leading-5 text-muted-foreground">
-              {youtubeLoadingMessages[messageIndex]}
-            </span>
-          </CardContent>
-        </Card>
+        <AiStatusCard messages={youtubeLoadingMessages} />
       ) : insights.length === 0 ? (
         <CardDescription className="m-0 text-sm">
           {emptyMessage}

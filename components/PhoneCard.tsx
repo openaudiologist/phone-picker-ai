@@ -115,9 +115,10 @@ export default function PhoneCard({
   pagination,
 }: PhoneCardProps) {
   const [activeDetailTab, setActiveDetailTab] = useState<"scores" | "strengths" | "whyfits">("strengths");
+  const amazonHref = getBestAmazonUrl(phone.amazonSearchQuery);
+
   const handleBuyClick = () => {
     trackPhoneClick(phone.name, phone.rank, budget);
-    window.open(getBestAmazonUrl(phone.amazonSearchQuery), "_blank", "noopener,noreferrer");
   };
 
   const detailReasons = phone.matchReasons?.length ? phone.matchReasons : phone.pros;
@@ -140,7 +141,6 @@ export default function PhoneCard({
               </h3>
               {phone.isBestPick ? <Badge variant="accent">Best match</Badge> : null}
             </div>
-            <CardDescription className="text-base font-medium text-primary">{phone.price}</CardDescription>
           </div>
 
           {pagination ? (
@@ -340,12 +340,22 @@ export default function PhoneCard({
         </motion.div>
 
         <div className="space-y-1">
-          <Button onClick={handleBuyClick} className="w-full">
-            <ShoppingCart className="h-4 w-4" />
-            Check on Amazon
-            <ArrowRight className="h-4 w-4" />
+          <Button asChild className="w-full">
+            <a
+              href={amazonHref}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              onClick={handleBuyClick}
+              aria-label={`Check ${phone.name} on Amazon`}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Check on Amazon
+              <ArrowRight className="h-4 w-4" />
+            </a>
           </Button>
-          <p className="text-center text-xs text-muted-foreground">Prices may vary</p>
+          <p className="text-center text-xs text-muted-foreground">
+            Prices and availability subject to change
+          </p>
         </div>
       </CardContent>
     </Card>

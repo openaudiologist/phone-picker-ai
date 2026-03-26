@@ -8,14 +8,13 @@ import {
   UserIcon,
 } from "lucide-react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AiWebBrowsingIcon } from "@hugeicons/core-free-icons";
+import { SmartPhone01Icon } from "@hugeicons/core-free-icons";
 import {
   AuiIf,
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
   getExternalStoreMessage,
-  useThreadViewport,
   useAuiState,
 } from "@assistant-ui/react";
 
@@ -31,12 +30,16 @@ import { cn } from "@/lib/utils";
 import type { ChatFlowMessage } from "@/types";
 
 interface ThreadProps {
+  welcomeHeader?: ReactNode;
   welcomeFooter?: ReactNode;
   renderAccessory?: (message: ChatFlowMessage) => ReactNode;
-  scrollTrigger?: number;
+  scrollAnchorMessageId?: string | null;
+  scrollAnchorTurnKey?: string | null;
 }
 
-export default function Thread({ welcomeFooter, renderAccessory, scrollTrigger }: ThreadProps) {
+export default function Thread({ welcomeHeader, welcomeFooter, renderAccessory, scrollAnchorMessageId, scrollAnchorTurnKey }: ThreadProps) {
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+
   return (
     <ThreadPrimitive.Root
       className="flex h-full min-h-0 flex-col overflow-hidden bg-background text-sm"
@@ -47,12 +50,27 @@ export default function Thread({ welcomeFooter, renderAccessory, scrollTrigger }
       }}
     >
       <ThreadPrimitive.Viewport
+        ref={viewportRef}
         turnAnchor="top"
-        className="relative flex min-h-0 flex-1 flex-col overflow-x-auto overflow-y-auto scroll-smooth px-4 pt-4"
+        autoScroll={false}
+        scrollToBottomOnRunStart={false}
+        scrollToBottomOnInitialize={false}
+        scrollToBottomOnThreadSwitch={false}
+        data-slot="thread-viewport"
+        className="relative flex min-h-0 flex-1 flex-col overflow-x-auto overflow-y-auto px-4 pt-4"
       >
-        <ThreadAutoScroller scrollTrigger={scrollTrigger} />
+        <ThreadAssistantTurnScroller
+          viewportRef={viewportRef}
+          scrollAnchorMessageId={scrollAnchorMessageId}
+          scrollAnchorTurnKey={scrollAnchorTurnKey}
+        />
         <AuiIf condition={(s) => s.thread.isEmpty}>
           <div className="flex flex-1 flex-col items-center justify-center">
+            {welcomeHeader ? (
+              <div className="mx-auto w-full max-w-[var(--thread-max-width)] pb-4">
+                {welcomeHeader}
+              </div>
+            ) : null}
             <ThreadWelcome />
             {welcomeFooter ? (
               <div className="mx-auto w-full max-w-[var(--thread-max-width)] py-4">
@@ -66,7 +84,7 @@ export default function Thread({ welcomeFooter, renderAccessory, scrollTrigger }
           {() => <ThreadMessage renderAccessory={renderAccessory} />}
         </ThreadPrimitive.Messages>
 
-        <ThreadPrimitive.ViewportFooter className="sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible pb-4">
+        <ThreadPrimitive.ViewportFooter className="sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible pb-8">
           <ThreadScrollToBottom />
         </ThreadPrimitive.ViewportFooter>
       </ThreadPrimitive.Viewport>
@@ -74,37 +92,78 @@ export default function Thread({ welcomeFooter, renderAccessory, scrollTrigger }
   );
 }
 
-function ThreadAutoScroller({ scrollTrigger }: { scrollTrigger?: number }) {
-  const scrollToBottom = useThreadViewport((s) => s.scrollToBottom);
-  const previousTriggerRef = useRef(scrollTrigger ?? 0);
+function ThreadAssistantTurnScroller({
+  viewportRef,
+  scrollAnchorMessageId,
+  scrollAnchorTurnKey,
+}: {
+  viewportRef: React.RefObject<HTMLDivElement | null>;
+  scrollAnchorMessageId?: string | null;
+  scrollAnchorTurnKey?: string | null;
+}) {
+  const previousAnchorRef = useRef<string | null>(null);
+  const previousTurnKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const nextTrigger = scrollTrigger ?? 0;
-    if (nextTrigger <= previousTriggerRef.current) {
-      previousTriggerRef.current = nextTrigger;
+    if (!scrollAnchorMessageId) {
+      previousAnchorRef.current = null;
+      previousTurnKeyRef.current = null;
       return;
     }
 
-    previousTriggerRef.current = nextTrigger;
+    const previousAnchor = previousAnchorRef.current;
+    const previousTurnKey = previousTurnKeyRef.current;
 
-    let frameTwo = 0;
+    if (
+      previousAnchor === scrollAnchorMessageId &&
+      previousTurnKey === (scrollAnchorTurnKey ?? null)
+    ) {
+      return;
+    }
 
-    const runScroll = () => {
-      scrollToBottom({ behavior: "smooth" });
+    previousAnchorRef.current = scrollAnchorMessageId;
+    previousTurnKeyRef.current = scrollAnchorTurnKey ?? null;
+
+    const runScroll = (behavior: ScrollBehavior) => {
+      const viewport = viewportRef.current;
+      if (!viewport) {
+        return;
+      }
+
+      const target = Array.from(
+        viewport.querySelectorAll<HTMLElement>("[data-message-id]")
+      ).find((element) => element.dataset.messageId === scrollAnchorMessageId);
+
+      if (!target) {
+        return;
+      }
+
+      const viewportTop = viewport.getBoundingClientRect().top;
+      const targetTop = target.getBoundingClientRect().top;
+      const nextScrollTop = viewport.scrollTop + (targetTop - viewportTop) - 8;
+
+      if (Math.abs(viewport.scrollTop - nextScrollTop) < 4) {
+        return;
+      }
+
+      viewport.scrollTo({
+        top: Math.max(0, nextScrollTop),
+        behavior,
+      });
     };
 
+    let frameTwo = 0;
     const frameOne = requestAnimationFrame(() => {
-      frameTwo = requestAnimationFrame(runScroll);
+      frameTwo = requestAnimationFrame(() => {
+        runScroll(previousAnchor ? "smooth" : "instant");
+      });
     });
-
-    const timer = window.setTimeout(runScroll, 180);
 
     return () => {
       cancelAnimationFrame(frameOne);
       cancelAnimationFrame(frameTwo);
-      window.clearTimeout(timer);
     };
-  }, [scrollToBottom, scrollTrigger]);
+  }, [scrollAnchorMessageId, scrollAnchorTurnKey, viewportRef]);
 
   return null;
 }
@@ -175,7 +234,7 @@ const AssistantMessageWithAccessory: FC<{
           )}
         >
           <AvatarFallback className="bg-primary text-primary-foreground">
-            <HugeiconsIcon icon={AiWebBrowsingIcon} className="size-4" />
+            <HugeiconsIcon icon={SmartPhone01Icon} className="size-4" />
           </AvatarFallback>
         </Avatar>
 

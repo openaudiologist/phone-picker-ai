@@ -139,6 +139,31 @@ html {
   scroll-behavior: smooth;
 }
 
+[data-slot="thread-viewport"] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+[data-slot="thread-viewport"]::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+[data-slot="thread-viewport"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+[data-slot="thread-viewport"]::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background-clip: content-box;
+}
+
+[data-slot="thread-viewport"]::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 @keyframes shimmer {
   0%,
   100% {

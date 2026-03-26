@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Mono, Inter, Public_Sans } from "next/font/google";
 import Script from "next/script";
+import AppFooterNotice from "@/components/AppFooterNotice";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body className={`${publicSans.variable} ${dmMono.variable} min-h-screen overflow-hidden font-sans antialiased`}>
         <Providers>
           <main className="h-dvh overflow-hidden">{children}</main>
+          <AppFooterNotice />
         </Providers>
       </body>
     </html>

@@ -57,7 +57,6 @@ export const PRIMARY_USE_OPTIONS: ChatOption[] = [
 ];
 
 export const BRAND_OPTIONS: ChatOption[] = [
-  { id: "brand-none", label: "No preference", value: "No preference" },
   { id: "brand-samsung", label: "Samsung", value: "Samsung" },
   { id: "brand-oneplus", label: "OnePlus", value: "OnePlus" },
   { id: "brand-xiaomi", label: "Xiaomi / Redmi", value: "Xiaomi / Redmi" },
@@ -74,7 +73,6 @@ export const UPGRADE_TIER_OPTIONS: ChatOption[] = [
   { id: "tier-budget", label: "Budget phone", value: "Budget phone" },
   { id: "tier-mid", label: "Mid-range phone", value: "Mid-range phone" },
   { id: "tier-premium", label: "Premium phone", value: "Premium phone" },
-  { id: "tier-unsure", label: "Not sure", value: "Not sure" },
   { id: "tier-skip", label: "Skip", value: "Skip", kind: "skip" },
 ];
 

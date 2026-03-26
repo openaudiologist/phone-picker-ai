@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import AiStatusCard from "@/components/AiStatusCard";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -10,28 +9,12 @@ const loadingMessages = [
   "Balancing camera, battery, and value",
   "Checking your best fits",
   "Polishing your shortlist",
-];
+ ] as const;
 
 export default function LoadingCards() {
-  const [messageIndex, setMessageIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % loadingMessages.length);
-    }, 1800);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="space-y-3">
-      <Card size="sm" className="gap-0 py-0 bg-muted/35 ring-1 ring-border/60">
-        <CardContent className="flex items-center gap-2.5 p-3">
-          <Loader2 className="h-4 w-4 shrink-0 animate-spin text-primary" />
-          <span className="text-sm leading-5 text-muted-foreground">
-            {loadingMessages[messageIndex]}
-          </span>
-        </CardContent>
-      </Card>
+      <AiStatusCard messages={loadingMessages} />
 
       <Card size="sm" className="gap-2.5 ring-1 ring-border/60">
         <CardHeader className="space-y-2.5">

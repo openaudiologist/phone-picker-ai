@@ -94,6 +94,20 @@ export interface RecommendationResponse {
   summary: string;
 }
 
+export type RecommendationErrorType = "no-match" | "technical";
+
+export interface RecommendationErrorState {
+  message: string;
+  type: RecommendationErrorType;
+}
+
+export interface AmazonMarketPick {
+  name: string;
+  tag: string;
+  priceNumeric: number;
+  amazonSearchQuery: string;
+}
+
 export interface YoutubeInsightResponse {
   phoneName: string;
   videoCount: number;

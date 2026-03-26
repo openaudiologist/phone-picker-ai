@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   BatteryFull,
@@ -62,6 +62,7 @@ import type {
   ChatStepId,
   FormData,
   GuidedAnswers,
+  RecommendationErrorState,
   RecommendationResponse,
   YoutubeInsightResponse,
 } from "@/types";
@@ -69,9 +70,12 @@ import type {
 interface GuidedChatProps {
   loading: boolean;
   results: RecommendationResponse | null;
-  error: string | null;
+  error: RecommendationErrorState | null;
   onSubmitFinal: (data: FormData) => Promise<void> | void;
   onStartOver: () => void;
+  welcomeHeaderSlot?: ReactNode;
+  loadingAccessorySlot?: ReactNode;
+  resultsFooterSlot?: ((currentPhoneIndex: number) => ReactNode) | null;
   onFetchYoutubeInsights?: (
     phoneNames: string[]
   ) => Promise<YoutubeInsightResponse[]>;
@@ -120,7 +124,6 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
             {results.phones.map((phone) => (
               <div key={phone.name} className="rounded-lg bg-muted px-3 py-3 text-center">
                 <div className="text-sm font-medium text-foreground">{phone.name}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{phone.price}</div>
               </div>
             ))}
           </div>
@@ -166,20 +169,23 @@ function CompareCard({ results }: { results: RecommendationResponse }) {
           const categoryLabel = categoryLabels[category];
 
           return (
-          <div key={category} className="rounded-lg bg-muted p-4">
-            <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-              <CategoryIcon className="h-3.5 w-3.5" />
-              <span>Best {categoryLabel}</span>
+            <div key={category} className="flex h-full min-h-32 flex-col rounded-lg bg-muted p-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <CategoryIcon className="h-3.5 w-3.5" />
+                  <span>Best {categoryLabel}</span>
+                </div>
+                <h4 className="text-sm font-semibold text-foreground">{phone.name}</h4>
+              </div>
+              <div className="mt-auto flex items-center gap-2 pt-4">
+                <Progress value={phone.scores[category]} className="h-1.5 flex-1" />
+                <span className="min-w-7 text-right text-xs font-medium text-foreground">
+                  {phone.scores[category]}
+                </span>
+              </div>
             </div>
-            <h4 className="mb-1 text-sm font-semibold text-foreground">{phone.name}</h4>
-            <div className="flex items-center gap-2">
-              <Progress value={phone.scores[category]} className="h-1.5 flex-1" />
-              <span className="min-w-7 text-right text-xs font-medium text-foreground">
-                {phone.scores[category]}
-              </span>
-            </div>
-          </div>
-        )})}
+          );
+        })}
       </div>
       </CardContent>
     </Card>
@@ -235,6 +241,9 @@ export default function GuidedChat({
   error,
   onSubmitFinal,
   onStartOver,
+  welcomeHeaderSlot,
+  loadingAccessorySlot,
+  resultsFooterSlot,
   onFetchYoutubeInsights,
 }: GuidedChatProps) {
   const [answers, setAnswers] = useState<GuidedAnswers>(getInitialGuidedAnswers);
@@ -422,17 +431,17 @@ export default function GuidedChat({
       return;
     }
 
-    if (errorRef.current === error) {
+    if (errorRef.current === error.message) {
       return;
     }
 
-    errorRef.current = error;
+    errorRef.current = error.message;
     loadingMessageIdRef.current = null;
 
     appendMessage(
       createChatMessage({
         role: "assistant",
-        text: `I hit a snag while fetching recommendations: ${error}`,
+        text: error.message,
         kind: "status",
       })
     );
@@ -548,7 +557,7 @@ export default function GuidedChat({
 
   const handleEditSpecificStep = useCallback(
     (stepId: ChatStepId) => {
-      if (results) {
+      if (results || error) {
         onStartOver();
       }
 
@@ -556,18 +565,18 @@ export default function GuidedChat({
       setYoutubeInsights([]);
       moveToStep(stepId, "Sure — let's update that.");
     },
-    [moveToStep, onStartOver, results]
+    [error, moveToStep, onStartOver, results]
   );
 
   const handleEditAnswers = useCallback(() => {
-    if (results) {
+    if (results || error) {
       onStartOver();
     }
 
     setShowCompare(false);
     setYoutubeInsights([]);
     moveToStep("budget", "Let's refine your answers from the top.");
-  }, [moveToStep, onStartOver, results]);
+  }, [error, moveToStep, onStartOver, results]);
 
   const handleFinalSubmit = useCallback(async () => {
     appendMessage(createUserAnswerMessage("summary", "Find my best phones"));
@@ -656,9 +665,18 @@ export default function GuidedChat({
     }));
   }, [answers]);
 
+  const hasDraftSelections = draftSelections.length > 0;
   const canContinueMultiSelect =
     currentStep === "primary_use"
-      ? draftSelections.length > 0
+      ? hasDraftSelections
+      : true;
+  const canContinuePainPoints =
+    currentStep === "pain_points"
+      ? hasDraftSelections
+      : true;
+  const canContinueMustHave =
+    currentStep === "must_have"
+      ? hasDraftSelections
       : true;
 
   const activeStepDefinition =
@@ -673,6 +691,13 @@ export default function GuidedChat({
     return null;
   }, [messages]);
 
+  const lastUserMessageId = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "user") return messages[i].id;
+    }
+    return null;
+  }, [messages]);
+
   const footerContent = useMemo(() => {
     if (loading) {
       return null;
@@ -680,11 +705,20 @@ export default function GuidedChat({
 
     if (error && !results) {
       return (
-        <StepFooter title="Recommendation issue" subtitle="You can retry the final fetch or adjust your answers locally.">
+        <StepFooter
+          title={error.type === "no-match" ? "Let’s refine your answers" : "Let’s refresh your shortlist"}
+          subtitle={
+            error.type === "no-match"
+              ? "Update your budget, brand, or priorities and I’ll retry with a stronger shortlist."
+              : "Try again for a fresh set of matches, or edit your answers if you want to steer the recommendations differently."
+          }
+        >
           <div className="flex flex-wrap gap-3">
-            <Button type="button" onClick={handleRetry}>
-              Try again
-            </Button>
+            {error.type === "technical" ? (
+              <Button type="button" onClick={handleRetry}>
+                Try again
+              </Button>
+            ) : null}
             <Button type="button" variant="secondary" onClick={handleEditAnswers}>
               Edit answers
             </Button>
@@ -805,6 +839,9 @@ export default function GuidedChat({
             onSelect={(option) => handleAnswer("brand", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
+            <Button type="button" variant="secondary" onClick={() => handleAnswer("brand", "No preference")}>
+              Skip
+            </Button>
             <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -818,11 +855,14 @@ export default function GuidedChat({
       return (
         <StepFooter title="Upgrade tier" subtitle="A rough tier is enough — this helps set expectations for the jump in quality.">
           <OptionChips
-            options={activeStepDefinition?.options ?? []}
+            options={(activeStepDefinition?.options ?? []).filter((option) => option.value !== "Skip")}
             selectedValues={draftSingleValue ? [draftSingleValue] : []}
             onSelect={(option) => handleAnswer("upgrade_tier", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
+            <Button type="button" variant="secondary" onClick={() => handleAnswer("upgrade_tier", "Skip")}>
+              Skip
+            </Button>
             <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -849,7 +889,11 @@ export default function GuidedChat({
             }}
           />
           <div className="flex flex-wrap gap-3">
-            <Button type="button" onClick={() => handleAnswer("pain_points", draftSelections)}>
+            <Button
+              type="button"
+              onClick={() => handleAnswer("pain_points", draftSelections)}
+              disabled={!canContinuePainPoints}
+            >
               <Check className="h-4 w-4" />
               Continue
             </Button>
@@ -882,9 +926,16 @@ export default function GuidedChat({
             }}
           />
           <div className="flex flex-wrap gap-3">
-            <Button type="button" onClick={() => handleAnswer("must_have", draftSelections)}>
+            <Button
+              type="button"
+              onClick={() => handleAnswer("must_have", draftSelections)}
+              disabled={!canContinueMustHave}
+            >
               <Check className="h-4 w-4" />
               Continue
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => handleAnswer("must_have", [])}>
+              Skip
             </Button>
             <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
@@ -904,6 +955,9 @@ export default function GuidedChat({
             onSelect={(option) => handleAnswer("camera_priority", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
+            <Button type="button" variant="secondary" onClick={() => handleAnswer("camera_priority", "Skip")}>
+              Skip
+            </Button>
             <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -922,6 +976,9 @@ export default function GuidedChat({
             onSelect={(option) => handleAnswer("gaming_priority", String(option.value))}
           />
           <div className="flex flex-wrap gap-3">
+            <Button type="button" variant="secondary" onClick={() => handleAnswer("gaming_priority", "Skip")}>
+              Skip
+            </Button>
             <Button type="button" variant="secondary" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -945,6 +1002,8 @@ export default function GuidedChat({
     return null;
   }, [
     activeStepDefinition?.options,
+    canContinueMustHave,
+    canContinuePainPoints,
     canContinueMultiSelect,
     currentStep,
     draftBudget,
@@ -975,7 +1034,12 @@ export default function GuidedChat({
       const isLastAssistant = message.id === lastAssistantMessageId;
 
       if (loading && message.id === loadingMessageIdRef.current) {
-        return <LoadingCards />;
+        return (
+          <div className="space-y-4">
+            <LoadingCards />
+            {loadingAccessorySlot ? <div className="pt-1">{loadingAccessorySlot}</div> : null}
+          </div>
+        );
       }
 
       if (results && message.id === resultsMessageIdRef.current) {
@@ -984,7 +1048,6 @@ export default function GuidedChat({
         return (
           <div className="space-y-4">
             <PhoneCard
-              key={currentPhone.name}
               phone={currentPhone}
               budget={answers.budget}
               pagination={{
@@ -1012,8 +1075,11 @@ export default function GuidedChat({
 
               return null;
             })}
-            {isLastAssistant && footerContent ? (
-              <div className="pt-1">{footerContent}</div>
+            {isLastAssistant && (footerContent || resultsFooterSlot) ? (
+              <div className="space-y-3 pt-1">
+                {footerContent}
+                {typeof resultsFooterSlot === "function" ? resultsFooterSlot(currentResultIndex) : resultsFooterSlot}
+              </div>
             ) : null}
           </div>
         );
@@ -1025,12 +1091,18 @@ export default function GuidedChat({
 
       return null;
     },
-    [answers.budget, currentResultIndex, footerContent, lastAssistantMessageId, loading, resultAccessoryOrder, results, showCompare, youtubeInsights, youtubeLoading]
+    [answers.budget, currentResultIndex, footerContent, lastAssistantMessageId, loading, loadingAccessorySlot, resultAccessoryOrder, results, resultsFooterSlot, showCompare, youtubeInsights, youtubeLoading]
   );
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <Thread renderAccessory={renderAccessory} welcomeFooter={footerContent} scrollTrigger={messages.length} />
+      <Thread
+        renderAccessory={renderAccessory}
+        welcomeHeader={welcomeHeaderSlot}
+        welcomeFooter={footerContent}
+        scrollAnchorMessageId={lastUserMessageId}
+        scrollAnchorTurnKey={lastAssistantMessageId}
+      />
     </AssistantRuntimeProvider>
   );
 }

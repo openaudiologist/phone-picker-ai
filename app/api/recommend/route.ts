@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import type { FormData, RecommendationResponse } from "@/types";
+import type {
+  FormData,
+  RecommendationErrorState,
+  RecommendationResponse,
+} from "@/types";
 
 const WHY_THIS_PHONE_MAX_CHARS = 200;
+const CLAUDE_MODEL = "claude-haiku-4-5-20251001";
+const MAX_RECOMMENDATION_ATTEMPTS = 2;
+const CLAUDE_REQUEST_TIMEOUT_MS = 30000;
+const CLAUDE_MAX_TOKENS = 2600;
+
+interface AIRecommendationResponse {
+  phones: RecommendationResponse["phones"];
+  summary: string;
+}
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -24,7 +37,93 @@ function normalizeInlineText(value: string) {
   return value.replace(/\s+/g, " ").trim();
 }
 
-function validateRecommendationPayload(payload: RecommendationResponse) {
+function isPositiveInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0;
+}
+
+function formatInr(value: number) {
+  return `₹${Math.round(value).toLocaleString("en-IN")}`;
+}
+
+function extractJsonObject(raw: string) {
+  const jsonStart = raw.indexOf("{");
+  const jsonEnd = raw.lastIndexOf("}");
+
+  if (jsonStart === -1 || jsonEnd === -1) {
+    throw new Error("Failed to parse AI response.");
+  }
+
+  return raw.slice(jsonStart, jsonEnd + 1);
+}
+
+function getFriendlyRecommendationErrorDetails(error: unknown): RecommendationErrorState {
+  const rawMessage = error instanceof Error ? error.message : "Unknown error occurred";
+  const normalizedMessage = rawMessage.toLowerCase();
+
+  if (
+    normalizedMessage.includes("timed out")
+  ) {
+    return {
+      type: "technical",
+      message:
+        "The recommendation took a bit too long. Please try again.",
+    };
+  }
+
+  if (
+    normalizedMessage.includes("failed to parse ai response") ||
+    normalizedMessage.includes("recommendation summary is missing") ||
+    normalizedMessage.includes("must contain exactly 3 phones") ||
+    normalizedMessage.includes("payload") ||
+    normalizedMessage.includes("scores are invalid") ||
+    normalizedMessage.includes("specs are incomplete")
+  ) {
+    return {
+      type: "technical",
+      message:
+        "I’m refreshing your shortlist right now to make sure the recommendations stay complete and reliable. Please try again in a moment.",
+    };
+  }
+
+  return {
+    type: "technical",
+    message:
+      "I’m refreshing your shortlist right now so I can return the strongest current matches. Please try again in a moment.",
+  };
+}
+
+function formatRecommendationAttemptFeedback(error: unknown) {
+  return error instanceof Error && error.message.trim()
+    ? error.message.trim()
+    : "The previous shortlist failed validation. Return a corrected shortlist that satisfies every rule.";
+}
+
+async function createClaudeResponse(systemPrompt: string, userPrompt: string) {
+  const message = await Promise.race([
+    anthropic.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: CLAUDE_MAX_TOKENS,
+      messages: [
+        {
+          role: "user",
+          content: userPrompt,
+        },
+      ],
+      system: systemPrompt,
+    }),
+    new Promise<never>((_, reject) => {
+      setTimeout(() => {
+        reject(
+          new Error("Claude request timed out while building the shortlist.")
+        );
+      }, CLAUDE_REQUEST_TIMEOUT_MS);
+    }),
+  ]);
+
+  return message.content[0].type === "text" ? message.content[0].text : "";
+}
+
+function validateRecommendationPayload(payload: AIRecommendationResponse) {
   if (!isNonEmptyString(payload.summary)) {
     throw new Error("Recommendation summary is missing.");
   }
@@ -49,23 +148,18 @@ function validateRecommendationPayload(payload: RecommendationResponse) {
     if (
       !isNonEmptyString(phone.name) ||
       !isNonEmptyString(phone.brand) ||
-      !isNonEmptyString(phone.price) ||
-      typeof phone.priceNumeric !== "number" ||
+      !isPositiveInteger(phone.priceNumeric) ||
       !isNonEmptyString(phone.tagline) ||
       !isNonEmptyString(phone.whyThisPhone) ||
       !isNonEmptyString(phone.amazonSearchQuery)
     ) {
-      throw new Error(`Phone payload is missing required string fields for rank ${phone.rank}.`);
+      throw new Error(`Phone payload is missing required fields for rank ${phone.rank}.`);
     }
 
     if (normalizeInlineText(phone.whyThisPhone).length > WHY_THIS_PHONE_MAX_CHARS) {
       throw new Error(
         `whyThisPhone must be ${WHY_THIS_PHONE_MAX_CHARS} characters or fewer for rank ${phone.rank}.`
       );
-    }
-
-    if (!phone.price.startsWith("₹")) {
-      throw new Error(`Phone price is not formatted in INR for rank ${phone.rank}.`);
     }
 
     if (
@@ -129,19 +223,33 @@ export async function POST(req: NextRequest) {
       !body.brandPreference
     ) {
       return NextResponse.json(
-        { error: "Missing required fields: budget, primaryUse, and brandPreference are required." },
+        {
+          error: "I need your budget, primary use, and brand preference before I can build the shortlist.",
+          errorType: "technical",
+        },
         { status: 400 }
       );
     }
 
     if (body.budget < 5000 || body.budget > 200000) {
       return NextResponse.json(
-        { error: "Budget must be between ₹5,000 and ₹2,00,000." },
+        {
+          error: "Please choose a budget between ₹5,000 and ₹2,00,000 so I can compare realistic options.",
+          errorType: "technical",
+        },
         { status: 400 }
       );
     }
 
-    const systemPrompt = `You are an expert mobile phone advisor for Indian buyers in 2025-2026. You have deep knowledge of phones sold in India across all major brands and price ranges. Prioritise phones that are realistically available in India and easy to find on Amazon India. Return ONLY a raw JSON object. No markdown, no backticks, no explanations, no notes before or after the JSON. Start with { and end with }.`;
+    const systemPrompt = `You are an expert mobile phone advisor for Indian buyers. You have deep knowledge of phones sold in India across all major brands and price ranges.
+
+You must recommend only phones that are:
+- Recent, popular, and widely available in India right now from major retailers or brand stores.
+- Not discontinued, not hard to find, not niche import models, and not outdated.
+
+Prioritise smart market-aware recommendations: choose the best current-value, current-relevance phones for the user's actual needs, not generic famous models.
+
+Return ONLY a raw JSON object. No markdown, no backticks, no explanations. Start with { and end with }.`;
 
     const primaryUses = body.primaryUse.join(", ");
     const mustHaveFeatures = body.mustHaveFeatures?.length
@@ -151,23 +259,8 @@ export async function POST(req: NextRequest) {
       ? body.currentPainPoints.join(", ")
       : "None";
 
-    const userPrompt = `A user wants a phone recommendation:
+    const recommendationPrompt = `A user wants a phone recommendation:
 - Budget: ₹${body.budget.toLocaleString("en-IN")}
-- Budget bracket label: ${
-      body.budget <= 10000
-        ? "Under ₹10,000"
-        : body.budget <= 15000
-          ? "₹10,000 to ₹15,000"
-          : body.budget <= 20000
-            ? "₹15,000 to ₹20,000"
-            : body.budget <= 25000
-              ? "₹20,000 to ₹25,000"
-              : body.budget <= 35000
-                ? "₹25,000 to ₹35,000"
-                : body.budget <= 50000
-                  ? "₹35,000 to ₹50,000"
-                  : "₹50,000+"
-    }
 - Primary uses: ${primaryUses}
 - Brand preference: ${body.brandPreference}
 - Current phone / upgrade context: ${body.currentPhone || "Not specified"}
@@ -177,7 +270,7 @@ export async function POST(req: NextRequest) {
 - Gaming priority: ${body.gamingPriority || "Not specified"}
 - Must-have features: ${mustHaveFeatures}
 
-Recommend exactly 3 phones available in India in 2025-2026 within or close to their budget. Prioritise phones that best match the user's actual needs, not generic flagship picks. Return this exact JSON shape:
+Recommend exactly 3 phones within or close to their budget. Prioritise phones that best match the user's actual needs. Only include phones that are popular and widely available in India today. Return this exact JSON shape:
 {
   "phones": [
     {
@@ -217,50 +310,64 @@ Recommend exactly 3 phones available in India in 2025-2026 within or close to th
 }
 Rules:
 - Set isBestPick: true only for rank 1.
+- priceNumeric must be your best estimate of the current India market price.
+- price must be priceNumeric formatted in INR (e.g. ₹59,999).
 - Make whyThisPhone genuinely personalised to the user's priorities.
-- whyThisPhone must be 200 characters or fewer, including spaces. Do not exceed this limit.
+- whyThisPhone must be 200 characters or fewer.
 - amazonSearchQuery should be the exact phone name.
 - All scores and matchScore must be between 0 and 100.
 - matchReasons, avoidIf, and bestFor should be concise and useful.
 - Return only raw JSON.`;
 
-    const message = await anthropic.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 4096,
-      messages: [
-        {
-          role: "user",
-          content: userPrompt,
-        },
-      ],
-      system: systemPrompt,
-    });
+    let parsed: AIRecommendationResponse | null = null;
+    let lastAttemptError: unknown = null;
 
-    const raw =
-      message.content[0].type === "text" ? message.content[0].text : "";
+    for (let attempt = 0; attempt < MAX_RECOMMENDATION_ATTEMPTS; attempt++) {
+      try {
+        const recommendationAttemptPrompt = `${recommendationPrompt}${
+          attempt === 0
+            ? ""
+            : `\n\nCorrection note for this retry:\n- The previous attempt failed: ${formatRecommendationAttemptFeedback(lastAttemptError)}\n- Fix the issue and return valid JSON.\n- Do not repeat the same invalid response.`
+        }`;
 
-    // Extract JSON from response
-    const jsonStart = raw.indexOf("{");
-    const jsonEnd = raw.lastIndexOf("}");
+        const rawRecommendation = await createClaudeResponse(
+          systemPrompt,
+          recommendationAttemptPrompt
+        );
+        const candidate = JSON.parse(
+          extractJsonObject(rawRecommendation)
+        ) as AIRecommendationResponse;
 
-    if (jsonStart === -1 || jsonEnd === -1) {
-      return NextResponse.json(
-        { error: "Failed to parse AI response." },
-        { status: 500 }
-      );
+        validateRecommendationPayload(candidate);
+        parsed = candidate;
+        break;
+      } catch (attemptError) {
+        console.error(`Recommendation attempt ${attempt + 1} failed:`, attemptError);
+        lastAttemptError = attemptError;
+      }
     }
 
-    const jsonString = raw.slice(jsonStart, jsonEnd + 1);
-    const parsed: RecommendationResponse = JSON.parse(jsonString);
-    validateRecommendationPayload(parsed);
+    if (!parsed) {
+      throw lastAttemptError instanceof Error
+        ? lastAttemptError
+        : new Error("Unable to build a valid shortlist after multiple attempts.");
+    }
 
-    return NextResponse.json(parsed, { status: 200 });
+    const response: RecommendationResponse = {
+      summary: parsed.summary,
+      phones: parsed.phones.map((phone) => ({
+        ...phone,
+        priceNumeric: Math.round(phone.priceNumeric),
+        price: formatInr(phone.priceNumeric),
+      })),
+    };
+
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.error("Recommendation API error:", error);
-    const message =
-      error instanceof Error ? error.message : "Unknown error occurred";
+    const errorDetails = getFriendlyRecommendationErrorDetails(error);
     return NextResponse.json(
-      { error: `Failed to get recommendations: ${message}` },
+      errorDetails,
       { status: 500 }
     );
   }
